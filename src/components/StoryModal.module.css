@@ -20,9 +20,10 @@
   max-width: 760px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideUp {
@@ -69,7 +70,10 @@
 }
 
 .container {
-  padding: 40px 32px;
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .center {
@@ -135,20 +139,20 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: clamp(30px, 5vw, 46px);
+  font-size: clamp(24px, 4vw, 36px);
   font-weight: 900;
   color: var(--ink);
   line-height: 1.1;
   letter-spacing: -0.02em;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .author {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 16px;
   font-style: italic;
   color: var(--text-muted);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .scoreBox {
@@ -242,21 +246,24 @@
 .divider {
   text-align: center;
   color: var(--amber);
-  font-size: 24px;
-  margin: 40px 0;
+  font-size: 20px;
+  margin: 20px 0;
   opacity: 0.4;
 }
 
 .content {
-  font-family: var(--font-display);
-  font-size: 18px;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: 400;
-  line-height: 1.9;
+  line-height: 1.5;
   color: var(--text-body);
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 8px;
 }
 
 .content p {
-  margin-bottom: 1.2em;
+  margin-bottom: 0.6em;
 }
 
 .noContent {
@@ -275,7 +282,7 @@
   }
   
   .container {
-    padding: 28px 18px;
+    padding: 16px 12px;
   }
   
   .closeBtn {

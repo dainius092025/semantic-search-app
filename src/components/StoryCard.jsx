@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import styles from "./StoryCard.module.css";
 
 const GENRE_COLORS = {
@@ -18,26 +17,26 @@ function getGenreStyle(genre) {
   return GENRE_COLORS[genre] || { bg: "var(--parchment-dark)", color: "var(--text-muted)" };
 }
 
-// Score is 0–100 float from the API
+// Score is 0–100 float from the API (adjusted by +10 for display)
 function scoreInfo(score) {
-  if (score >= 50) return { label: "Strong match",  bar: "#22c55e", pct: Math.round(score, 100) };
-  if (score >= 35) return { label: "Good match",    bar: "#eab308", pct: Math.round(score, 100) };
-  if (score >= 20) return { label: "Partial match", bar: "#f97316", pct: Math.round(score, 100) };
+  if (score >= 60) return { label: "Strong match",  bar: "#22c55e", pct: Math.round(score, 100) };
+  if (score >= 45) return { label: "Good match",    bar: "#eab308", pct: Math.round(score, 100) };
+  if (score >= 30) return { label: "Partial match", bar: "#f97316", pct: Math.round(score, 100) };
   return               { label: "Weak match",    bar: "#9ca3af", pct: Math.round(score, 100) };
 }
 
-export default function StoryCard({ story, index }) {
-  const navigate = useNavigate();
+export default function StoryCard({ story, index, onClick }) {
   const { id, title, author, genre, publishedYear, summary, score } = story;
   const genreStyle = getGenreStyle(genre);
   const hasScore = typeof score === "number";
-  const si = hasScore ? scoreInfo(score) : null;
+  const adjustedScore = score + 10;
+  const si = hasScore ? scoreInfo(adjustedScore) : null;
 
   return (
     <article
       className={styles.card}
       style={{ animationDelay: `${index * 55}ms` }}
-      onClick={() => navigate(`/story/${id}`, { state: { story } })}
+      onClick={onClick}
     >
       <div className={styles.top}>
         <span className={styles.genreBadge} style={{ background: genreStyle.bg, color: genreStyle.color }}>
@@ -72,7 +71,7 @@ export default function StoryCard({ story, index }) {
         </span>
        {hasScore && (
           <span className={styles.scoreNum} style={{ color: si.bar }}>
-            {score.toFixed(1)}%
+            {adjustedScore.toFixed(1)}%
           </span>
         )}
        

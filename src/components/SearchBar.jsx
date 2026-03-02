@@ -60,7 +60,7 @@ export default function SearchBar({ onSearch, loading, mode }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="e.g. loneliness by the sea, technology out of control…"
+            placeholder="Type Here…"
             autoFocus
           />
           {query && (
@@ -77,7 +77,7 @@ export default function SearchBar({ onSearch, loading, mode }) {
       </div>
 
       <div className={styles.suggestions}>
-        <span className={styles.suggestLabel}>Try:</span>
+        <span className={styles.suggestLabel}>TRENDING SEARCHES:</span>
         {SUGGESTIONS.map((s) => (
           <button key={s} className={styles.tag} onClick={() => handleSuggestion(s)}>
             {s}

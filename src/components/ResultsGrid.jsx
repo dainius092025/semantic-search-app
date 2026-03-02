@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import StoryCard from "./StoryCard";
 import styles from "./ResultsGrid.module.css";
 
-export default function ResultsGrid({ results, query }) {
+export default function ResultsGrid({ results, query, onStoryClick }) {
   const [genreFilter, setGenreFilter] = useState("all");
   const [sortBy, setSortBy] = useState("default");
 
@@ -76,7 +76,7 @@ export default function ResultsGrid({ results, query }) {
       ) : (
         <div className={styles.grid}>
           {filtered.map((story, i) => (
-            <StoryCard key={story.id} story={story} index={i} />
+            <StoryCard key={story.id} story={story} index={i} onClick={() => onStoryClick(story)} />
           ))}
         </div>
       )}

@@ -80,49 +80,6 @@ export default function StoryModal({ story, onClose }) {
         </button>
 
         <div className={styles.container}>
-          <header className={styles.header}>
-            <div className={styles.badges}>
-              <span
-                className={styles.genreBadge}
-                style={{ background: genreStyle.bg, color: genreStyle.color }}
-              >
-                {genre}
-              </span>
-              <span className={styles.yearBadge}>{publishedYear}</span>
-              <span className={styles.idBadge}>Story #{id}</span>
-            </div>
-
-            <h1 className={styles.title}>{title}</h1>
-            <p className={styles.author}>by {author}</p>
-
-            {summary && (
-              <div className={styles.summaryBox}>
-                <p className={styles.summaryLabel}>Summary</p>
-                <p className={styles.summaryText}>{summary}</p>
-              </div>
-            )}
-
-            {typeof storyData.score === "number" && (
-              <div className={styles.scoreBox}>
-                <div className={styles.scoreLeft}>
-                  <p className={styles.scoreTitle}>Relevance Score</p>
-                  <p className={styles.scoreValue}>{storyData.score.toFixed(2)}</p>
-                </div>
-                <div className={styles.scoreBarWrap}>
-                  <div className={styles.scoreTrack}>
-                    <div
-                      className={styles.scoreFill}
-                      style={{ width: `${Math.min(storyData.score, 100)}%` }}
-                    />
-                  </div>
-                  <p className={styles.scoreHint}>out of 100 — higher means more semantically similar to your query</p>
-                </div>
-              </div>
-            )}
-          </header>
-
-          <div className={styles.divider}><span>❧</span></div>
-
           <main className={styles.content}>
             {content ? (
               content.split("\n").map((para, i) =>
