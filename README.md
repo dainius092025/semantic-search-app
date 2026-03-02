@@ -1,4 +1,4 @@
-# 📚 Semantic Search for Short Story Publisher
+# Semantic Search for Short Story Publisher
 
 A fullstack application that allows users to search for short stories 
 using natural language.
