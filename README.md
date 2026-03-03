@@ -1,7 +1,10 @@
 # Semantic Search for Short Story Publisher
 
-A fullstack application that allows users to search for short stories 
-using natural language.
+
+## About 
+Users can search for short stories using natural language 
+phrases like "loneliness by the sea" or "technology out of control".
+The app uses AI embeddings to understand meaning, not just keywords.
 
 ## Architecture
 
@@ -36,6 +39,11 @@ docker exec -it semantic_ollama ollama pull nomic-embed-text
 ### 4. Enable pgvector
 docker exec -it semantic_db psql -U admin -d semanticdb 
 -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+### 5. Access pgAdmin (optional)
+Open http://localhost:5050 in your browser
+- Email: admin@admin.com
+- Password: secret
 
 ## Team
 
