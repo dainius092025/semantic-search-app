@@ -4,7 +4,6 @@
   max-width: 740px;
   margin: 0 auto;
 }
-
 .eyebrow {
   font-size: 11px;
   font-weight: 500;
@@ -13,7 +12,6 @@
   color: var(--amber);
   margin-bottom: 20px;
 }
-
 .headline {
   font-family: var(--font-display);
   font-size: clamp(38px, 6vw, 60px);
@@ -23,12 +21,10 @@
   margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
-
 .headline em {
   font-style: italic;
   color: var(--amber);
 }
-
 .sub {
   font-size: 16px;
   color: var(--text-muted);
@@ -37,21 +33,18 @@
   margin: 0 auto 40px;
   line-height: 1.7;
 }
-
 .inputRow {
   display: flex;
   gap: 10px;
   max-width: 680px;
   margin: 0 auto 20px;
 }
-
 .inputWrap {
   flex: 1;
   position: relative;
   display: flex;
   align-items: center;
 }
-
 .inputIcon {
   position: absolute;
   left: 16px;
@@ -60,7 +53,6 @@
   align-items: center;
   pointer-events: none;
 }
-
 .input {
   width: 100%;
   padding: 15px 44px 15px 48px;
@@ -72,18 +64,19 @@
   color: var(--text-body);
   outline: none;
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
-
 .input::placeholder {
   color: var(--text-faint);
 }
-
 .input:focus {
   border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(200, 134, 10, 0.12), var(--shadow-sm);
+  box-shadow:
+    0 0 0 3px rgba(200, 134, 10, 0.12),
+    var(--shadow-sm);
 }
-
 .clearBtn {
   position: absolute;
   right: 14px;
@@ -97,7 +90,6 @@
 .clearBtn:hover {
   color: var(--text-muted);
 }
-
 .searchBtn {
   padding: 15px 28px;
   background: var(--ink);
@@ -108,28 +100,27 @@
   letter-spacing: 0.04em;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.1s,
+    box-shadow 0.2s;
   white-space: nowrap;
   min-width: 110px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .searchBtn:hover:not(:disabled) {
   background: var(--amber);
   box-shadow: var(--shadow-md);
 }
-
 .searchBtn:active:not(:disabled) {
   transform: scale(0.98);
 }
-
 .searchBtn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
-
 .spinner {
   width: 16px;
   height: 16px;
@@ -139,7 +130,6 @@
   animation: spin 0.7s linear infinite;
   display: inline-block;
 }
-
 .suggestions {
   display: flex;
   flex-wrap: wrap;
@@ -149,14 +139,12 @@
   max-width: 680px;
   margin: 0 auto;
 }
-
 .suggestLabel {
   font-size: 12px;
   color: var(--text-faint);
   font-weight: 400;
   margin-right: 2px;
 }
-
 .tag {
   font-family: var(--font-body);
   font-size: 12px;
@@ -169,13 +157,11 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-
 .tag:hover {
   background: var(--amber-pale);
   border-color: var(--amber-light);
   color: var(--ink);
 }
-
 @media (max-width: 600px) {
   .inputRow {
     flex-direction: column;
@@ -183,9 +169,7 @@
   .searchBtn {
     width: 100%;
   }
-}
-
-/* Mode toggle */
+} /* Mode toggle */
 .modeRow {
   display: flex;
   gap: 8px;
@@ -205,8 +189,22 @@
   transition: all 0.15s;
   min-width: 90px;
 }
-.modeBtn:hover { border-color: var(--amber-light); }
-.modeActive { background: var(--amber-pale); border-color: var(--amber) !important; }
-.modeLabel { font-size: 13px; font-weight: 600; color: var(--ink); }
-.modeDesc  { font-size: 10px; color: var(--text-faint); }
-.modeActive .modeLabel { color: var(--amber); }
+.modeBtn:hover {
+  border-color: var(--amber-light);
+}
+.modeActive {
+  background: var(--amber-pale);
+  border-color: var(--amber) !important;
+}
+.modeLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.modeDesc {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+.modeActive .modeLabel {
+  color: var(--amber);
+}
