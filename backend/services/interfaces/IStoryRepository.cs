@@ -1,11 +1,11 @@
 /* This file defines the "contract" for all database operations related to stories any class that implemets this interface  MUST have these methods. This is the most important interface in the project - everypart of the BE that needs data goes through here. */
 
-
+using Backend.Models;
 
 namespace Backend.Services.Interfaces
 {
     public interface IStoryRepository
-    {
+    { 
         // Saves a new story to the database and is usedwhen seedingthe database with stories
         // Task         = asynchronous operation
         // AddAsync     = saves a new story to the database
@@ -17,7 +17,7 @@ namespace Backend.Services.Interfaces
         // IEnumerable<Story>      = returns a list of stories
         // SearchAsync             = searches the database
         // float[] embedding       = accepts a vector to compare against
-        Task<IEnumerable<Story>> SearchAsync(float[] embedding);
+       Task<IEnumerable<Story>> SearchAsync(float[] embedding);
 
         // Gets one story from the database by its ID. Returns null if the story does not exist.
         // Used by the story detail endpoint.
@@ -33,4 +33,4 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID to check
         Task<bool> ExistsAsync(int id);
     }
-}
+} 
