@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "title": "The Lighthouse Keeper",
+    "genre": "Literary Fiction",
+    "author": "Ingrid Solheim",
+    "published_year": 2018
+  },
+  {
+    "id": 2,
+    "title": "Red Shift",
+    "genre": "Science Fiction",
+    "author": "Arjun Mehta",
+    "published_year": 2021
+  },
+  {
+    "id": 3,
+    "title": "The Inheritance",
+    "genre": "Mystery",
+    "author": "Claire Dumont",
+    "published_year": 2016
+  },
+  {
+    "id": 4,
+    "title": "The Garden of Second Chances",
+    "genre": "Fantasy",
+    "author": "Elias Navarro",
+    "published_year": 2019
+  },
+  {
+    "id": 5,
+    "title": "Last Bus Home",
+    "genre": "Contemporary Drama",
+    "author": "Maja Kristoffersen",
+    "published_year": 2017
+  },
+  {
+    "id": 6,
+    "title": "Warranty Void",
+    "genre": "Tech Thriller",
+    "author": "Daniel Cho",
+    "published_year": 2023
+  },
+  {
+    "id": 7,
+    "title": "A Recipe for Rain",
+    "genre": "Magical Realism",
+    "author": "Sofia Alvarez",
+    "published_year": 2015
+  },
+  {
+    "id": 8,
+    "title": "The Clockmaker's Apprentice",
+    "genre": "Historical Fiction",
+    "author": "Tomasz Nowak",
+    "published_year": 2008
+  },
+  {
+    "id": 9,
+    "title": "The Silent Orchard",
+    "genre": "Post-Apocalyptic",
+    "author": "Harper Quinn",
+    "published_year": 2020
+  },
+  {
+    "id": 10,
+    "title": "Customer Support",
+    "genre": "Humor",
+    "author": "Oliver Bennett",
+    "published_year": 2022
+  }
+]
