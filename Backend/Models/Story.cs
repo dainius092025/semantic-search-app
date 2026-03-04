@@ -10,4 +10,5 @@ public class Story
     public string Genre { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Summary { get; set; } = string.Empty;
+    public float[] Embedding { get; set; } = Array.Empty<float>();
 }
