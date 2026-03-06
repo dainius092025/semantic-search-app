@@ -5,6 +5,7 @@ using OllamaSharp;
 using Backend.Services.Interfaces;
 
 
+
 namespace Backend.Services;
                             //this class must implement IOllamaService contract
 public class OllamaService : IOllamaService
@@ -21,6 +22,40 @@ public class OllamaService : IOllamaService
         _ollama = new OllamaApiClient("http://ollama:11434");
     }
 
+
+    // this is my helper method hat retries an operation if it fails, in here <T> measn that this method can return any type of data.
+    private async Task<T> RetryAsync<T>(Func<Task<T>> action, int maxRetries = 3)
+
+
+    {   
+        //delays will control how long we wait between retries, we start with 1 second and then double it for each retry (1s, 2s, 4s) to give the system more time to recover if there is a temporary issue. We will retry a maximum of 3 times before giving up and letting the exception happen.
+        var delayMs = 1000;
+
+
+        //we try the operation ultiple times 
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+
+        {   
+            //try to execute the operation (for example calling Ollama) if it succeeds, return the result immeddiately
+            try
+            {
+                return await action();
+            }
+
+            //if error happens catch it, retry happens only if "when" we still have attempts left
+            catch when (attempt < maxRetries)
+            {
+                //this bit waits before trying again, everytime waiting time doubles
+                await Task.Delay(delayMs);
+
+                delayMs *= 2; // backoff timer: double the delay for the next retry
+            }
+        }
+
+        return await action();// if we get to here it means we have retried the maximum number of times and we will just try one last time and if it fails we will let the exception happen and handle it in the controller.
+    }
+
+
     //method bellow sends text to Ollama and gets back a vector that represents the meaning of the text. We use this to convert stories and search queries into vectors so we can find stories that match the meaning of a search.
             //async- this method runs asynchronously(app wont freeze)
                 //returns a list of decimal numbers that represent the embedding vector
@@ -31,13 +66,15 @@ public class OllamaService : IOllamaService
         //sends the text to Ollama and asks for an embedding
                     //"await" means to wait for ollama to respond before continuing
                                                             //here we tell ollama what we want
-        var result = await _ollama.EmbedAsync(new EmbedRequest
-        {
-            //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
-            Model = "nomic-embed-text",
-            //the text we want to  convertto vector
-            Input = new List<string> { text }
-        });
+        var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
+            {
+                //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
+                Model = "nomic-embed-text",
+
+                //the text we want to  convertto vector
+                Input = new List<string> { text }
+            })
+        );
 
         //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
         return result.Embeddings[0].Select(d => (float)d).ToArray();
@@ -48,6 +85,7 @@ public class OllamaService : IOllamaService
     {
         //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
         var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+
         //empty string to hold the response from Ollama as it comes in chunks
         var response = "";
 
@@ -57,6 +95,7 @@ public class OllamaService : IOllamaService
                             //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
             response += chunk?.Response;
         }
+
         //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
         return response.Trim();
     }
