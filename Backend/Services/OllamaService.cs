@@ -83,20 +83,25 @@ public class OllamaService : IOllamaService
     //this method sends text to alllama and gets back the a generated summary 
     public async Task<string> GenerateSummaryAsync(string text)
     {
-        //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
-        var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+        return await RetryAsync(async () =>
+        {        
+            //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
+            var prompt = $"Summarize this short story in 1-2 sentences: {text}";
 
-        //empty string to hold the response from Ollama as it comes in chunks
-        var response = "";
+            //empty string to hold the response from Ollama as it comes in chunks
+            var response = "";
 
-        //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
-        await foreach (var chunk in _ollama.GenerateAsync(prompt))
-        {
-                            //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
-            response += chunk?.Response;
-        }
+            //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
+            await foreach (var chunk in _ollama.GenerateAsync(prompt))
+            {
+                                //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
+                response += chunk?.Response ?? "";
+            }
+            
+            //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
+            return response.Trim();
+        });
 
-        //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
-        return response.Trim();
+
     }
 }
