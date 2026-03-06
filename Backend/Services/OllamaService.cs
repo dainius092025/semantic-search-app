@@ -97,7 +97,7 @@ public class OllamaService : IOllamaService
                                 //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
                 response += chunk?.Response ?? "";
             }
-            
+
             //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
             return response.Trim();
         });
@@ -105,3 +105,14 @@ public class OllamaService : IOllamaService
 
     }
 }
+
+
+/*  for learning purposes, here is an architecturalof this service:
+                                                                    Controller
+                                                                        ↓
+                                                                    OllamaService
+                                                                        ↓
+                                                                    RetryAsync
+                                                                        ↓
+                                                                    Ollama API 
+It provides two capabilities: text to embedding vector, text to summary*/
