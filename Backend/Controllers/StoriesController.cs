@@ -27,11 +27,12 @@ namespace Backend.Controllers;
 public class StoriesController : ControllerBase
 {
     //at the moment its holds only testing, later i will add endpoints like: GET /api/stories/{id}
-
+/*
+    DELETE BEFORE WORKING FURTHER ON THIS CONTROLLER, THIS IS JUST A TEST ENDPOINT TO MAKE SURE THE CONTROLLER IS SET UP CORRECTLY AND CAN RESPOND TO REQUESTS. IT RETURNS A SIMPLE JSON MESSAGE WHEN YOU HIT /api/stories/test
     [HttpGet("test")]
     public IActionResult Test()
     {
         return Ok(new { message = "stories controllers is working!" });
     }
-
+*/
 }
