@@ -52,7 +52,7 @@ public class StoriesController : ControllerBase
     // GET /api/stories/{id}, this endpoint returns a single story by id
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetStroyById(int id)
+    public async Task<IActionResult> GetStoyById(int id)
     {
         // ask the repository for the story with the given id
         var story = await _storyRepository.GetByIdAsync(id);
