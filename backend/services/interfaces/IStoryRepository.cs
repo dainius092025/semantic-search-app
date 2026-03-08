@@ -1,4 +1,15 @@
-/* This file defines the "contract" for all database operations related to stories any class that implemets this interface  MUST have these methods. This is the most important interface in the project - everypart of the BE that needs data goes through here. */
+/// <summary>
+/// Defines the contract for all database operations related to stories.
+/// Any class implementing this interface must provide methods to:
+/// - save stories
+/// - search stories using embedding vectors
+/// - retrieve stories by ID
+/// - check if a story already exists
+/// 
+/// This interface acts as the main gateway between the application logic
+/// and the database layer for all story-related data.
+/// </summary>
+
 
 using Backend.Models;
 

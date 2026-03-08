@@ -17,6 +17,8 @@
 /// </summary>
 
 using Microsoft.AspNetCore.Mvc;
+using Backend.Services.Interfaces;
+using Backend.Models.DTOs;
 
 namespace Backend.Controllers;
 
@@ -35,4 +37,42 @@ public class StoriesController : ControllerBase
         return Ok(new { message = "stories controllers is working!" });
     }
 */
+
+    private readonly IStoryRepository _storyRepository; //this variable will hold the repository instance that we will use to interact with the database and retrieve story data.
+
+    //Constructor, Asp.net automatically injects the repository here using dependency injection.
+    //this allows the controller to access the repository without ctreating it manually
+    public StoriesController(IStoryRepository storyRepository)
+    {   //this is calss field
+                          //This is the constructor parameter. comes from ASP.net dependancy injection
+        _storyRepository = storyRepository; //Take the repository object ASP.NET gave us and store it inside the controller field.
+    }
+
+    //MY ENDPOINT 
+    // GET /api/stories/{id}, this endpoint returns a single story by id
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetStroyById(int id)
+    {
+        // ask the repository for the story with the given id
+        var story = await _storyRepository.GetByIdAsync(id);
+
+        //if the story does not exist, return http 404 not found
+        if (story == null)
+        {
+            return NotFound();
+        }
+
+        var storyDto =  new StoryDetailDTO
+        {
+            Id = story.Id,
+            Title = story.Title,
+            Author = story.Author,
+            Year = story.Year,
+            Genre = story.Genre,
+            Content = story.Content
+        };
+        //if the story exists, return http 200 with the story data
+        return Ok(storyDto);
+    }
 }
