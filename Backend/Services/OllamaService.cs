@@ -19,7 +19,7 @@ public class OllamaService : IOllamaService
     public OllamaService()//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
     {
         //here we create a new instance of the OllamaApiClient and pass in the URL of our Ollama API. This sets up the connection so we can start sending requests to generate embeddings and summaries.
-        _ollama = new OllamaApiClient("http://ollama:11434");
+        _ollama = new OllamaApiClient("http://localhost:11434");
     }
 
 
