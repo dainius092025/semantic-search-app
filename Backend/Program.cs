@@ -11,6 +11,7 @@ builder.Services.AddControllers();
 
 // Register OllamaService so it can be used throughout the app
 builder.Services.AddScoped<IOllamaService, OllamaService>();
+builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 var app = builder.Build();
 
