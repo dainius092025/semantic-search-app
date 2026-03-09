@@ -6,15 +6,10 @@ namespace Backend.Models.DTOs;
 public class StoryDetailDTO
 {
     public int Id { get; set; }                        // Unique story identifier
-
     public string Title { get; set; } = string.Empty;  // Story title
-
     public string Author { get; set; } = string.Empty; // Story author
-
     public int Year { get; set; }                      // Publication year
-
     public string Genre { get; set; } = string.Empty;  // Story genre
-
     public string Content { get; set; } = string.Empty; // Full story text
 
 }
