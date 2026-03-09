@@ -1,5 +1,5 @@
 <Solution>
- <Folder Name="/backend/">
-    <Project Path="backend/semantic-search-app.csproj" />
+ <Folder Name="/Backend/">
+    <Project Path="Backend/semantic-search-app.csproj" />
   </Folder>
 </Solution>
