@@ -71,13 +71,11 @@ System displays:
 
 User can read the full story.
 
-The prototype will be created using Figma before full implementation.
+The prototype will be created using Figma AI mock website before full implementation.
 
 ---
 
-## 5. Testing and Iteration
-
-The prototype will be presented to the client.
+## 5. Testing
 
 Feedback will be collected about:
 
@@ -86,4 +84,49 @@ Feedback will be collected about:
 * Usefulness of summaries
 
 Depending on feedback, the design and functionality will be improved before development continues.
+The prototype will be presented to the client.
 
+## Testing
+
+Two informal usability testing sessions were conducted with
+team members and stakeholders.
+
+### Session 1 feedback
+
+Users asked whether categories could be selected when searching, suggesting that some expected additional filtering options. Some users were also unsure whether running the same search multiple times would produce the same results, indicating that the behavior of the search system was not fully clear.
+
+The bookshelf feature appeared random to several users, and they questioned whether any factors influence which books appear there. Some users also wondered where the books originate from, suggesting that the purpose of the bookshelf feature could be explained more clearly.
+
+Additionally, a few users asked whether the system contains only short stories and whether stories are always displayed in a single-page format, indicating that the scope of the content may not be immediately obvious.
+
+### Session 2 feedback
+
+Several common themes emerged during the testing sessions.
+
+Users generally liked the clean design, story cards, and the relevance-based search results. The match score and trending searches were frequently mentioned as useful features.
+
+However, the bookshelf feature was not immediately understood by several users. While the idea of a random story was appreciated, the purpose of the bookshelf was not always clear.
+
+Some users also suggested improvements to the story popup layout and visual hierarchy.
+
+
+
+## 6. Iteration
+
+Based on the feedback, several improvements were identified:
+
+• Clarify the purpose of the bookshelf feature
+• Consider replacing it with a "Surprise Me" button
+• Improve hover interactions for story previews
+• Highlight bookshelf stories matching the search
+• Adjust color palette (sepia suggested instead of red)
+
+## Reflection
+
+The user testing sessions provided valuable insight into how users interpret and interact with the interface. Overall, users responded positively to the clean layout, story cards, and relevance-based search results. Several participants mentioned that the interface was intuitive and visually appealing, and the ability to search for stories based on themes or feelings was seen as a useful feature.
+
+However, the testing also revealed some areas that were not immediately clear to users. In particular, the bookshelf feature caused some confusion. While some users found it fun and interactive, others were unsure how the books were selected or what the feature represented. This indicates that the purpose and logic of the bookshelf component should be communicated more clearly in the interface.
+
+The testing also highlighted the importance of visual clarity and interaction feedback. Some users suggested improvements to the story popup layout and mentioned that certain elements, such as the match score and story titles, could be more visually prominent. Additionally, some users expressed interest in additional filtering options, such as searching for stories suitable for specific age groups.
+
+Overall, the testing confirmed that the core concept of discovering short stories through semantic search works well, but it also emphasized the need for clearer feature explanations and small interface improvements to make the experience more intuitive.
