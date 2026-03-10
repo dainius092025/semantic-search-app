@@ -14,5 +14,11 @@ public class Story
     public string Genre { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Summary { get; set; } = string.Empty;
+
+    // Temporary placeholder for embeddings.
+    // Real embeddings are not yet generated or stored, so we use a float array for now.
     public float[] Embedding { get; set; } = Array.Empty<float>();
+
+    // Planned implementation once pgvector integration is complete
+    // public Vector Embedding { get; set; } = new Vector(new float[0])
 }

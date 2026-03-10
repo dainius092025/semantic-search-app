@@ -65,6 +65,7 @@ public class SearchController : ControllerBase
                 Id = story.Id,
                 Title = story.Title,
                 Author = story.Author,
+                Year = story.Year,
                 Summary = story.Summary,
                 Similarity = 0
             }).ToList();
