@@ -3,7 +3,7 @@
 using OllamaSharp.Models;
 using OllamaSharp;
 using Backend.Services.Interfaces;
-
+using Microsoft.Extensions.Configuration;
 
 
 namespace Backend.Services;
@@ -16,10 +16,14 @@ public class OllamaService : IOllamaService
                                     //the name of the connection
     private readonly OllamaApiClient _ollama;
 
-    public OllamaService()//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
+    // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
+    public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
     {
         //here we create a new instance of the OllamaApiClient and pass in the URL of our Ollama API. This sets up the connection so we can start sending requests to generate embeddings and summaries.
-        _ollama = new OllamaApiClient("http://localhost:11434");
+        // We read the URL from configuration (appsettings.json) to avoid hardcoding it.
+        // This makes the application more flexible for different environments.
+        var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
+        _ollama = new OllamaApiClient(ollamaUrl);
     }
 
 
@@ -52,7 +56,10 @@ public class OllamaService : IOllamaService
             }
         }
 
-        return await action();// if we get to here it means we have retried the maximum number of times and we will just try one last time and if it fails we will let the exception happen and handle it in the controller.
+        // This code is unreachable. On the final attempt, the exception from `action()` will
+        // not be caught by the `catch` block and will propagate up, which is the correct behavior.
+        // We add a throw to satisfy the compiler's need for a return path.
+        throw new InvalidOperationException("This code should not be reachable.");
     }
 
 
