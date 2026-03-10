@@ -1,6 +1,6 @@
-// Temporary placeholder - other developers will complete this
-
 using System.Text.Json.Serialization;
+using Pgvector;
+
 namespace Backend.Models;
 
 public class Story
@@ -14,5 +14,7 @@ public class Story
     public string Genre { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Summary { get; set; } = string.Empty;
-    public float[] Embedding { get; set; } = Array.Empty<float>();
+    
+    // Using Vector type from Pgvector for better database mapping
+    public Vector Embedding { get; set; } = null!;
 }
