@@ -57,23 +57,25 @@ public class SearchController : ControllerBase
             var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
 
             //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
-            var stories = await _storyRepository.SearchAsync(embedding);
+            var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
 
-            // Convert the story objects into DTOs that are safe to return to the frontend
-            var results = stories.Take(request.Limit).Select(story => new SearchResultDTO
+         // Inside the .Select() loop:
+            var results = storyResults.Select(result => new SearchResultDTO
             {
-                Id = story.Id,
-                Title = story.Title,
-                Author = story.Author,
-                Summary = story.Summary,
-                Similarity = 0
+                Id = result.Story.Id,
+                Title = result.Story.Title,
+                Author = result.Story.Author,
+                Year = result.Story.Year,
+                Summary = result.Story.Summary,
+                // The similarity score (e.g., 0.95) is now provided by the repository.
+                Similarity = result.Similarity
             }).ToList();
 
             return Ok(results);
         }
         catch (Exception ex)
         {   //if something fails, return HTTP 500
-            return StatusCode(500, ex.Message);
+            return StatusCode(500, "An internal server error occurred while searching.");
         }
     }
 

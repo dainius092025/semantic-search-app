@@ -11,12 +11,17 @@ builder.Services.AddOpenApi();
 // Added controllers so the app can find our controllers
 builder.Services.AddControllers();
 
+<<<<<<< HEAD
 // Register IngestionService so it can be injected into controllers and other services
 builder.Services.AddScoped<IngestionService>();
 
 // Register AppDbContext with PostgreSQL and pgvector
+=======
+// Register AppDbContext with PostgreSQL and pgvector support
+>>>>>>> 04151be3cda13b195097862a37598037962df1a5
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), o => o.UseVector()));
+
 
 // Register OllamaService so it can be used throughout the app
 builder.Services.AddScoped<IOllamaService, OllamaService>();
