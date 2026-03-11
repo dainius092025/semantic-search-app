@@ -11,6 +11,6 @@ POST {{src_HostAddress}}/api/Search
 Content-Type: application/json
 
 {
-  "query": "lighthouse",
+  "query": "happy life",
   "limit": 5
 }

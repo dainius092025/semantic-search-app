@@ -27,7 +27,8 @@ public class IngestionController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Ingestion failed: {ex.Message}");
+            var errorMessage = ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, $"Ingestion failed: {errorMessage}");
         }
     }
 }

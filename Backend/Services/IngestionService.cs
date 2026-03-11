@@ -26,24 +26,22 @@ public class IngestionService : IStoryIngestionService
         // 1. Load metadata and raw text from files
         var rawStories = await _dataLoader.LoadAllStoriesAsync();
 
-        // 2. Parallel Processing (The "Level 3" Flowchart)
-        // We use Task.WhenAll to process multiple stories at the same time
-        var tasks = rawStories.Select(async story =>
+        // 2. Process stories one by one
+        foreach (var story in rawStories)
         {
             // Check if story already exists to avoid duplicates
-            if (await _repository.ExistsAsync(story.Id)) return;
+            if (await _repository.ExistsAsync(story.Id))
+                continue;
 
-            // Generate Embedding (Retries are handled inside OllamaService)
+            // Generate Embedding
             var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
             story.Embedding = new Pgvector.Vector(vector);
 
             // Generate Summary
             story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
 
-            // 3. Save to Database (PostgreSQL)
+            // 3. Save to Database
             await _repository.AddAsync(story);
-        });
-
-        await Task.WhenAll(tasks);
+        }
     }
 }

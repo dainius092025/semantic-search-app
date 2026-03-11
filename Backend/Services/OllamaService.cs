@@ -16,6 +16,8 @@ public class OllamaService : IOllamaService
                                     //the name of the connection
     private readonly OllamaApiClient _ollama;
 
+    private readonly string _summaryModel;
+
     // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
     public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
     {
@@ -24,6 +26,9 @@ public class OllamaService : IOllamaService
         // This makes the application more flexible for different environments.
         var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
         _ollama = new OllamaApiClient(ollamaUrl);
+
+     _summaryModel = configuration["Ollama:SummaryModel"] ?? "llama3.2";
+    _ollama.SelectedModel = _summaryModel;
     }
 
 
@@ -80,8 +85,7 @@ public class OllamaService : IOllamaService
 
                 //the text we want to  convertto vector
                 Input = new List<string> { text }
-            })
-        );
+            }) );
 
         //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
         return result.Embeddings[0].Select(d => (float)d).ToArray();
