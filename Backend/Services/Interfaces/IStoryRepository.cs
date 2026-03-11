@@ -25,10 +25,10 @@ namespace Backend.Services.Interfaces
 
         // Searches the database for stories that match the meaning of a search query. Takes an embedding vector and returns a list of matching stories.
         // Used by the search endpoint.
-        // IEnumerable<Story>      = returns a list of stories
+        // IEnumerable<(Story Story, double Similarity)> = returns a list of tuples, each with a story and its similarity score.
         // SearchAsync             = searches the database
         // float[] embedding       = accepts a vector to compare against
-       Task<IEnumerable<Story>> SearchAsync(float[] embedding);
+       Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit);
 
         // Gets one story from the database by its ID. Returns null if the story does not exist.
         // Used by the story detail endpoint.
