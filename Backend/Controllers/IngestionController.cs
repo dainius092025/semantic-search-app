@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Backend.Services;
 
 namespace Backend.Controllers;
@@ -10,10 +11,12 @@ namespace Backend.Controllers;
 public class IngestionController : ControllerBase
 {
     private readonly IngestionService _ingestionService;
+    private readonly ILogger<IngestionController> _logger;
 
-    public IngestionController(IngestionService ingestionService)
+    public IngestionController(IngestionService ingestionService, ILogger<IngestionController> logger)
     {
         _ingestionService = ingestionService;
+        _logger = logger;
     }
 
     [HttpPost("run")]
@@ -26,9 +29,8 @@ public class IngestionController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An unexpected error occurred during the ingestion process.");
             return StatusCode(500, $"Ingestion failed: {ex.Message}");
         }
     }
 }
-
-

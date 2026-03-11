@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Interfaces;
 using Backend.Models.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Controllers;
 
@@ -17,13 +18,17 @@ public class SearchController : ControllerBase
 
     private readonly IStoryRepository _storyRepository;//Dependancy: repository that gives access to the story data. We will use it to search stories using the embedding vectors we get from the OllamaService
 
+    private readonly ILogger<SearchController> _logger;
+
     //this is constructor, ASP.NET will automatically inject the dependencies (OllamaService and StoryRepository). this means we do not manually creaet these objects
-    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository)
+    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository, ILogger<SearchController> logger)
     {
         //store the injected Ollama service in a private variable
         _ollamaService = ollamaService;
 
         _storyRepository = storyRepository;
+
+        _logger = logger;
     }
 
     //this attribute marks this method as an HTTP POST endpoint, the final route becomes: POST /api/search
@@ -75,6 +80,7 @@ public class SearchController : ControllerBase
         }
         catch (Exception ex)
         {   //if something fails, return HTTP 500
+            _logger.LogError(ex, "An unexpected error occurred during search for query: {Query}", request.Query);
             return StatusCode(500, "An internal server error occurred while searching.");
         }
     }
