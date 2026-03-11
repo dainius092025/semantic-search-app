@@ -8,10 +8,8 @@ namespace Backend.Services.Interfaces;
 
 public interface IStoryIngestionService
 {
-    //runs asynchronously, basically program can start this work and continue doing other things while waitng for it to finish
-        //IngestStory+Async(process a story for the search system + method is asynchronous and will return a Task 
-                         //method expects a story object as input, which contains the data that needs to be ingested into the search system
-    Task IngestStoryAsync(Story story);
+
+    Task RunFullIngestionAsync(); // This method will run the entire ingestion process, from loading raw story data to generating embeddings and summaries, and finally saving everything to the database. It is designed to be called once to populate the system with stories, and can be scheduled to run periodically if needed.
 }
 
 

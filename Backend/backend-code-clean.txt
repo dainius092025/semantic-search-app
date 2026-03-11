@@ -1,0 +1,968 @@
+===== ./Controllers/IngestionController.cs =====
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Backend.Services;
+
+namespace Backend.Controllers;
+
+
+[ApiController]
+[Route("api/[controller]")]
+public class IngestionController : ControllerBase
+{
+    private readonly IngestionService _ingestionService;
+
+    public IngestionController(IngestionService ingestionService)
+    {
+        _ingestionService = ingestionService;
+    }
+
+    [HttpPost("run")]
+    public async Task<IActionResult> StartIngestion()
+    {
+        try 
+        {
+            await _ingestionService.RunFullIngestionAsync();
+            return Ok("Ingestion completed successfully!");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Ingestion failed: {ex.Message}");
+        }
+    }
+}
+
+
+===== ./Controllers/SearchController.cs =====
+using Microsoft.AspNetCore.Mvc;
+using Backend.Services.Interfaces;
+using Backend.Models.DTOs;
+
+namespace Backend.Controllers;
+
+
+[ApiController] // marking this class as an api controller, which means it will handle HTTP requests and return JSON responses.
+
+[Route ("api/[controller]")]//sets the base route for all endpoints in this controller, for example: /api/search
+
+// this defines the SearchController class, which will handle all search related endpoints, such as POST /api/search
+public class SearchController : ControllerBase
+{
+
+    private readonly IOllamaService _ollamaService;//Dependancy: service that communicats with the Ollama API to perform semantic search and get summaries. we will use it to convert the users search text into an embedding vector
+
+    private readonly IStoryRepository _storyRepository;//Dependancy: repository that gives access to the story data. We will use it to search stories using the embedding vectors we get from the OllamaService
+
+    //this is constructor, ASP.NET will automatically inject the dependencies (OllamaService and StoryRepository). this means we do not manually creaet these objects
+    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository)
+    {
+        //store the injected Ollama service in a private variable
+        _ollamaService = ollamaService;
+
+        _storyRepository = storyRepository;
+    }
+
+    //this attribute marks this method as an HTTP POST endpoint, the final route becomes: POST /api/search
+    [HttpPost]
+
+    //this method handles search request ftom the frontend.
+            //async method runs asynchronously, non blocking
+                //Task represents an asynchronous operation
+                    //IActionResult is flexible HTTP response(ok, BadRequest or others)
+                                            //fromBody tells ASP.NET to read JSON from the request body and convert it into a SearchRequestDTO object automaticcaly.
+    public async Task<IActionResult> Search([FromBody] SearchRequestDTO request)
+    {
+        //checkif the query is empty or null, if it is return http 400 bad request with a message.
+        if (string.IsNullOrWhiteSpace(request.Query))
+        {
+            return BadRequest("Query cannot be empty");
+        }
+        //check if the query is too short, if it is return http 400 bad request with a message.
+        if (request.Query.Trim().Length < 3)
+        {
+            return BadRequest("Quest must be at least 3 characters long");
+        }
+        // Ensure limit stays within a safe range, so that users(frontend) cannot request too many results at once, which could overload the system. If the limit is less than or equal to 0, or greater than 20, we default it to 5.
+        if (request.Limit <= 0 || request.Limit > 20)
+        {
+            request.Limit = 5;
+        }
+
+        try
+        {   //convert the search text into an embedding vector using the Ollama service
+            var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
+
+            //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
+            var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
+
+         // Inside the .Select() loop:
+            var results = storyResults.Select(result => new SearchResultDTO
+            {
+                Id = result.Story.Id,
+                Title = result.Story.Title,
+                Author = result.Story.Author,
+                Year = result.Story.Year,
+                Summary = result.Story.Summary,
+                // The similarity score (e.g., 0.95) is now provided by the repository.
+                Similarity = result.Similarity
+            }).ToList();
+
+            return Ok(results);
+        }
+        catch (Exception)
+        {   //if something fails, return HTTP 500
+            return StatusCode(500, "An unexpected error occured. - developer");
+        }
+    }
+
+
+
+}
+
+
+/* 
+backend search flow
+User types query
+      ↓
+POST /api/search
+      ↓
+SearchController
+      ↓
+OllamaService → convert text → embedding vector
+      ↓
+StoryRepository → search stories by vector similarity
+      ↓
+Return SearchResultDTO list 
+*/===== ./Controllers/StoriesController.cs =====
+/// <summary>
+///This file defines the StoriesController.
+///Responsibility:
+///     The controller handles HTTP requests related to individual stories.
+///     It acts as the entry point between the frontend and the backend logic.
+///What this controller will do:
+///     - Receive requests from the frontend
+///     - Call backend services or repositories to retrieve story data
+///     - Return results as JSON responses
+/// Planned endpoints:
+///     - GET /api/stories/{id}: 
+///     Returns the full story when a user selects a story from search results.
+/// In the future this controller will connect to:
+///     - IStoryRepository (to retrieve story data from the database)
+///     - DTO models (to control what data is returned to the frontend)
+/// 
+/// </summary>
+
+using Microsoft.AspNetCore.Mvc;
+using Backend.Services.Interfaces;
+using Backend.Models.DTOs;
+
+namespace Backend.Controllers;
+
+[ApiController]  //this bit tells ASP.NET tha this calss is an API COntroller, which means it will handle HTTP requests and return JSON responses.
+
+[Route("api/[controller]")]//this sets the base route for all endpoints in this controller, for example: /api/stories
+
+public class StoriesController : ControllerBase
+{
+    //at the moment its holds only testing, later i will add endpoints like: GET /api/stories/{id}
+/*
+    DELETE BEFORE WORKING FURTHER ON THIS CONTROLLER, THIS IS JUST A TEST ENDPOINT TO MAKE SURE THE CONTROLLER IS SET UP CORRECTLY AND CAN RESPOND TO REQUESTS. IT RETURNS A SIMPLE JSON MESSAGE WHEN YOU HIT /api/stories/test
+    [HttpGet("test")]
+    public IActionResult Test()
+    {
+        return Ok(new { message = "stories controllers is working!" });
+    }
+*/
+
+    private readonly IStoryRepository _storyRepository; //this variable will hold the repository instance that we will use to interact with the database and retrieve story data.
+
+    //Constructor, Asp.net automatically injects the repository here using dependency injection.
+    //this allows the controller to access the repository without ctreating it manually
+    public StoriesController(IStoryRepository storyRepository)
+    {   //this is calss field
+                          //This is the constructor parameter. comes from ASP.net dependancy injection
+        _storyRepository = storyRepository; //Take the repository object ASP.NET gave us and store it inside the controller field.
+    }
+
+    //MY ENDPOINT 
+    // GET /api/stories/{id}, this endpoint returns a single story by id
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetStoryById(int id)
+    {
+        try
+        {
+            // ask the repository for the story with the given id
+            var story = await _storyRepository.GetByIdAsync(id);
+
+            //if the story does not exist, return http 404 not found
+            if (story == null)
+            {
+                return NotFound();
+            }
+
+            var storyDto = new StoryDetailDTO // map to DTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            };
+            //if the story exists, return http 200 with the story data
+            return Ok(storyDto);
+        }
+        catch (Exception )
+        {
+            // In a real application, you would log the full exception here for debugging.
+            // For example: _logger.LogError(ex, "Error retrieving story with id {StoryId}", id);
+            // Then, return a generic error message to the client.
+            return StatusCode(500, "An internal server error occurred.");
+        }
+    }
+}===== ./Data/AppDbContext.cs =====
+using Backend.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Backend.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Story> Stories { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Enable the pgvector extension in the database
+            modelBuilder.HasPostgresExtension("vector");
+
+            modelBuilder.Entity<Story>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                // Map the Vector property to a pgvector column with 768 dimensions
+                entity.Property(e => e.Embedding)
+                      .HasColumnType("vector(768)");
+            });
+
+            base.OnModelCreating(modelBuilder);
+        }
+    }
+}
+===== ./Migrations/20260310121912_InitialCreate.cs =====
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
+
+#nullable disable
+
+namespace semanticsearchapp.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:vector", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "Stories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Author = table.Column<string>(type: "text", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Genre = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    Summary = table.Column<string>(type: "text", nullable: false),
+                    Embedding = table.Column<Vector>(type: "vector(768)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stories", x => x.Id);
+                });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Stories");
+        }
+    }
+}
+===== ./Migrations/20260310121912_InitialCreate.Designer.cs =====
+﻿// <auto-generated />
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
+
+#nullable disable
+
+namespace semanticsearchapp.Migrations
+{
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260310121912_InitialCreate")]
+    partial class InitialCreate
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Backend.Models.Story", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("Embedding")
+                        .IsRequired()
+                        .HasColumnType("vector(768)");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("published_year");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Stories");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+===== ./Migrations/AppDbContextModelSnapshot.cs =====
+﻿// <auto-generated />
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
+
+#nullable disable
+
+namespace semanticsearchapp.Migrations
+{
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Backend.Models.Story", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("Embedding")
+                        .IsRequired()
+                        .HasColumnType("vector(768)");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("published_year");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Stories");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+===== ./Models/DTOs/SearchRequestDTO.cs =====
+using System;
+
+namespace Backend.Models.DTOs;
+
+// The incoming request from the React SearchBar
+public class SearchRequestDTO
+{
+    public string Query { get; set; } = string.Empty; // The "User Intent"
+    public int Limit { get; set; } = 5;               // Default matches to return
+}
+===== ./Models/DTOs/SearchResultDTO.cs =====
+
+
+using Microsoft.Net.Http.Headers;
+
+namespace Backend.Models.DTOs;
+
+public class SearchResultDTO
+{
+    public int Id { get; set; } //front end needs the id to know which story to fetch when the user clicks on a search result
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string Summary { get; set; } = string.Empty; // The 1-2 sentence AI summary
+    public double Similarity { get; set; }              // The Cosine Similarity score
+}
+===== ./Models/DTOs/StoryDetailDTO.cs =====
+
+namespace Backend.Models.DTOs;
+
+// This DTO represents the full details of a story.
+// It is returned when the frontend requests one story by ID.
+public class StoryDetailDTO
+{
+    public int Id { get; set; }                        // Unique story identifier
+    public string Title { get; set; } = string.Empty;  // Story title
+    public string Author { get; set; } = string.Empty; // Story author
+    public int Year { get; set; }                      // Publication year
+    public string Genre { get; set; } = string.Empty;  // Story genre
+    public string Content { get; set; } = string.Empty; // Full story text
+
+}===== ./Models/DTOs/StoryIngestionDTO.cs =====
+using System;
+
+namespace Backend.Models.DTOs;
+
+public class StoryIngestionDTO
+{
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string Genre { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty; // To link to the .txt file (not sure yet)
+}
+===== ./Models/Story.cs =====
+using System.Text.Json.Serialization;
+using Pgvector;
+
+namespace Backend.Models;
+
+public class Story
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+
+    [JsonPropertyName("published_year")]
+    public int Year { get; set; }
+    public string Genre { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
+
+/*     // Temporary placeholder for embeddings.
+    // Real embeddings are not yet generated or stored, so we use a float array for now.
+    public float[] Embedding { get; set; } = Array.Empty<float>();
+
+    // Planned implementation once pgvector integration is complete
+    // public Vector Embedding { get; set; } = new Vector(new float[0])
+} */
+    
+    // Using Vector type from Pgvector for better database mapping
+    public Vector Embedding { get; set; } = null!;
+}
+===== ./Program.cs =====
+using Backend.Services;
+using Backend.Services.Interfaces;
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Added OpenAPI/Swagger for testing endpoints
+builder.Services.AddOpenApi();
+
+// Added controllers so the app can find our controllers
+builder.Services.AddControllers();
+
+// Register IngestionService so it can be injected into controllers and other services
+builder.Services.AddScoped<IngestionService>();
+
+// Register AppDbContext with PostgreSQL and pgvector
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), o => o.UseVector()));
+
+
+// Register OllamaService so it can be used throughout the app
+builder.Services.AddScoped<IOllamaService, OllamaService>();
+builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+
+var app = builder.Build();
+
+// Enable Swagger in development mode
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+// Map controller routes automatically
+app.MapControllers();
+
+app.Run();===== ./Services/DataLoading/StoryDataLoader.cs =====
+using Backend.Models;
+using System.Text.Json;
+
+
+namespace Backend.Services.DataLoading
+{
+    public class StoryDataLoader
+    {
+        private readonly string _metadataPath;
+        private readonly string _storiesPath;
+
+        public StoryDataLoader()
+        {/*
+        it was looking for the metadata.json file in the Backend folder, 
+        but since the Docs folder is outside of Backend, it could not find it. 
+        I adjusted the file path logic to go up one level from the Backend folder 
+        to the project root, and then down into Docs/Stories to find the metadata.json 
+        file. This way, it can correctly locate the metadata and story files regardless 
+        of where the application is run from.
+            _metadataPath = Path.Combine(Directory.GetCurrentDirectory(), "Docs", "Stories", "metadata.json");
+            _storiesPath = Path.Combine(Directory.GetCurrentDirectory(), "Docs", "Stories");
+        */
+        //Adjusted file path logic so the application correctly locates 
+        // Docs/Stories/metadata.json from the project root instead of the Backend folder
+            var projectRoot = Directory.GetParent(Directory.GetCurrentDirectory())!.FullName;
+
+            _metadataPath = Path.Combine(projectRoot, "Docs", "Stories", "metadata.json");
+            _storiesPath = Path.Combine(projectRoot, "Docs", "Stories");
+        }
+
+        public async Task<List<Story>> LoadAllStoriesAsync()
+        {
+            var stories = new List<Story>();
+            var json = await File.ReadAllTextAsync(_metadataPath);
+            // Configure JSON deserialization so property names are matched without 
+            // case sensitivity. Our metadata.json uses lowercase names 
+            // (id, title, author, etc.), while the C# Story class uses PascalCase 
+            // (Id, Title, Author).This option allows the JSON fields to map correctly 
+            // to the Story properties.
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true // This allows the deserializer to match JSON properties to C# properties regardless of case
+            };
+            var metadata = JsonSerializer.Deserialize<List<Story>>(json, options);
+
+            if (metadata != null)
+            {
+                foreach (var meta in metadata)
+                {
+                    stories.Add(new Story
+                    {
+                        Id = meta.Id,
+                        Title = meta.Title,
+                        Author = meta.Author,
+                        Year = meta.Year,
+                        Genre = meta.Genre,
+                        Content = LoadStoryContent(meta.Title),
+                        Summary = string.Empty
+                    });
+                }
+            }
+            return stories;
+        }
+
+        public string LoadStoryContent(string title)
+        {
+            var filename = title.Replace(" ", "_") + ".txt";
+            var path = Path.Combine(_storiesPath, filename);
+            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+        }
+    }
+}===== ./Services/IngestionService.cs =====
+
+using Backend.Services.Interfaces;
+using Backend.Services.DataLoading;
+
+namespace Backend.Services;
+
+
+// This service orchestrates the entire ingestion process, from loading raw data to generating embeddings and summaries, and finally saving everything to the database. 
+// It is designed to be efficient and scalable, leveraging asynchronous programming and parallel processing where appropriate.
+
+public class IngestionService
+{
+    private readonly IStoryRepository _repository;
+    private readonly IOllamaService _ollama;
+    private readonly StoryDataLoader _dataLoader;
+
+    public IngestionService(IStoryRepository repository, IOllamaService ollama)
+    {
+        _repository = repository;
+        _ollama = ollama;
+        _dataLoader = new StoryDataLoader();
+    }
+
+    public async Task RunFullIngestionAsync()
+    {
+        // 1. Load metadata and raw text from files
+        var rawStories = await _dataLoader.LoadAllStoriesAsync();
+
+        // 2. Parallel Processing (The "Level 3" Flowchart)
+        // We use Task.WhenAll to process multiple stories at the same time
+        var tasks = rawStories.Select(async story =>
+        {
+            // Check if story already exists to avoid duplicates
+            if (await _repository.ExistsAsync(story.Id)) return;
+
+            // Generate Embedding (Retries are handled inside OllamaService)
+            var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+            story.Embedding = new Pgvector.Vector(vector);
+
+            // Generate Summary
+            story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+
+            // 3. Save to Database (PostgreSQL)
+            await _repository.AddAsync(story);
+        });
+
+        await Task.WhenAll(tasks);
+    }
+}===== ./Services/Interfaces/IOllamaService.cs =====
+/* This file defines the "contract" for the Ollama service. Any class that implements this interface MUST have these two methods. This allows ither parts of the BE to use Ollama. */
+
+namespace Backend.Services.Interfaces;
+
+public interface IOllamaService
+{
+    /* NOTE FOR ME SO I GET IT:
+        Semantic search works by comparing meaning, not ords. To comparemeaning, we convert text into a list of numbers called an "embedding vector". similar texts produce similar vectors. it sends the text to Ollama and returns a float array(vector) that represents the "meaning of the text numericaly. we used for converting stories and search queries into vectors so we can find that match the meaning of a search. */
+
+    // Task        = asynchronous operation (app won't freeze while waiting)
+    // float[]     = returns a list of decimal numbers (the embedding vector)
+    // Generate    = creates something new
+    // Embedding   = a vector representing the meaning of the text
+    // Async       = naming convention for asynchronous methods
+    // string text = accepts plain text as input
+
+    Task<float[]> GenerateEmbeddingAsync(string text);
+
+
+    /* Users need a short sumamry to decide if a story is releveant without reading the full text. We use Ollama to generate this automaticaly instead of writting it manualy. It sends the story to Olama and returns a 1-2 sentence summary that describe the meaning and theme of the story, so later we can use it to display a short description under each search result. */
+
+    // string      = returns plain text (the generated summary)
+    // Summary     = a 1-2 sentence description of the story
+
+    Task<string> GenerateSummaryAsync(string text);
+}
+===== ./Services/Interfaces/IStoryIngestionService.cs =====
+
+using Backend.Models;
+
+/// <summary>
+/// Defines the contract for services responsible for ingestion stories into the semanitc search system. The ignestion service coordinates the pipeline that prepares stories for search, such as processing story data and passing it to other components (for example: embedding generation and database storage). This interface specifies what ingestion operations are available, while the actual logic is implemented in StoryIngestionService.
+/// </summary>
+namespace Backend.Services.Interfaces;
+
+public interface IStoryIngestionService
+{
+    //runs asynchronously, basically program can start this work and continue doing other things while waitng for it to finish
+        //IngestStory+Async(process a story for the search system + method is asynchronous and will return a Task 
+                         //method expects a story object as input, which contains the data that needs to be ingested into the search system
+    Task IngestStoryAsync(Story story);
+}
+
+
+
+
+
+===== ./Services/Interfaces/IStoryRepository.cs =====
+/// <summary>
+/// Defines the contract for all database operations related to stories.
+/// Any class implementing this interface must provide methods to:
+/// - save stories
+/// - search stories using embedding vectors
+/// - retrieve stories by ID
+/// - check if a story already exists
+/// 
+/// This interface acts as the main gateway between the application logic
+/// and the database layer for all story-related data.
+/// </summary>
+
+
+using Backend.Models;
+
+namespace Backend.Services.Interfaces
+{
+    public interface IStoryRepository
+    { 
+        // Saves a new story to the database and is usedwhen seedingthe database with stories
+        // Task         = asynchronous operation
+        // AddAsync     = saves a new story to the database
+        // Story story  = accepts a Story object to save
+        Task AddAsync(Story story);
+
+        // Searches the database for stories that match the meaning of a search query. Takes an embedding vector and returns a list of matching stories.
+        // Used by the search endpoint.
+        // IEnumerable<(Story Story, double Similarity)> = returns a list of tuples, each with a story and its similarity score.
+        // SearchAsync             = searches the database
+        // float[] embedding       = accepts a vector to compare against
+       Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit);
+
+        // Gets one story from the database by its ID. Returns null if the story does not exist.
+        // Used by the story detail endpoint.
+        // Task<Story>  = returns a single story
+        // GetByIdAsync = finds a story by its ID
+        // int id       = accepts the story ID
+        Task<Story?> GetByIdAsync(int id);
+
+        // Checks if a story already exists in the database. Returns true if it exists, false if it does not.
+        // Used by the seeder to avoid saving duplicate stories.
+        // Task<bool>   = returns true or false
+        // ExistsAsync  = checks if story already exists
+        // int id       = accepts the story ID to check
+        Task<bool> ExistsAsync(int id);
+    }
+} ===== ./Services/OllamaService.cs =====
+//this class implemets IOllamaSrvice, It is responsible for communicating with Ollama to generate embedding and summaries.
+
+using OllamaSharp.Models;
+using OllamaSharp;
+using Backend.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+
+
+namespace Backend.Services;
+                            //this class must implement IOllamaService contract
+public class OllamaService : IOllamaService
+{
+    //this is a viarable that hods our connection to the Ollama API. We will use it to send requests to Ollama and get responses back
+            //readonly = can only be assigned once, in the constructor. This is good for things like API clients that should not change after they are created.
+                    //a class provided by the OllamaSharp library that makes it easy to send requests to the Ollama API and handle responses.
+                                    //the name of the connection
+    private readonly OllamaApiClient _ollama;
+
+    // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
+    public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
+    {
+        //here we create a new instance of the OllamaApiClient and pass in the URL of our Ollama API. This sets up the connection so we can start sending requests to generate embeddings and summaries.
+        // We read the URL from configuration (appsettings.json) to avoid hardcoding it.
+        // This makes the application more flexible for different environments.
+        var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
+        _ollama = new OllamaApiClient(ollamaUrl);
+    }
+
+
+    // this is my helper method hat retries an operation if it fails, in here <T> measn that this method can return any type of data.
+    private async Task<T> RetryAsync<T>(Func<Task<T>> action, int maxRetries = 3)
+
+
+    {   
+        //delays will control how long we wait between retries, we start with 1 second and then double it for each retry (1s, 2s, 4s) to give the system more time to recover if there is a temporary issue. We will retry a maximum of 3 times before giving up and letting the exception happen.
+        var delayMs = 1000;
+
+
+        //we try the operation ultiple times 
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+
+        {   
+            //try to execute the operation (for example calling Ollama) if it succeeds, return the result immeddiately
+            try
+            {
+                return await action();
+            }
+
+            //if error happens catch it, retry happens only if "when" we still have attempts left
+            catch when (attempt < maxRetries)
+            {
+                //this bit waits before trying again, everytime waiting time doubles
+                await Task.Delay(delayMs);
+
+                delayMs *= 2; // backoff timer: double the delay for the next retry
+            }
+        }
+
+        // This code is unreachable. On the final attempt, the exception from `action()` will
+        // not be caught by the `catch` block and will propagate up, which is the correct behavior.
+        // We add a throw to satisfy the compiler's need for a return path.
+        throw new InvalidOperationException("This code should not be reachable.");
+    }
+
+
+    //method bellow sends text to Ollama and gets back a vector that represents the meaning of the text. We use this to convert stories and search queries into vectors so we can find stories that match the meaning of a search.
+            //async- this method runs asynchronously(app wont freeze)
+                //returns a list of decimal numbers that represent the embedding vector
+                    //the name of the method
+                        //accepts plain text as input
+    public async Task<float[]> GenerateEmbeddingAsync(string text)
+    {
+        //sends the text to Ollama and asks for an embedding
+                    //"await" means to wait for ollama to respond before continuing
+                                                            //here we tell ollama what we want
+        var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
+            {
+                //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
+                Model = "nomic-embed-text",
+
+                //the text we want to  convertto vector
+                Input = new List<string> { text }
+            })
+        );
+
+        //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
+        return result.Embeddings[0].Select(d => (float)d).ToArray();
+    }
+
+    //this method sends text to alllama and gets back the a generated summary 
+    public async Task<string> GenerateSummaryAsync(string text)
+    {
+        return await RetryAsync(async () =>
+        {        
+            //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
+            var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+
+            //empty string to hold the response from Ollama as it comes in chunks
+            var response = "";
+
+            //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
+            await foreach (var chunk in _ollama.GenerateAsync(prompt))
+            {
+                                //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
+                response += chunk?.Response ?? "";
+            }
+
+            //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
+            return response.Trim();
+        });
+
+
+    }
+}
+
+
+/*  for learning purposes, here is an architecturalof this service:
+                                                                    Controller
+                                                                        ↓
+                                                                    OllamaService
+                                                                        ↓
+                                                                    RetryAsync
+                                                                        ↓
+                                                                    Ollama API 
+It provides two capabilities: text to embedding vector, text to summary*/
+===== ./Services/Search/StorySearchService.cs =====
+using Backend.Models;
+
+namespace Backend.Services.Search;
+
+    public class StorySearchService
+    {
+        public IEnumerable<Story> SearchByEmbedding(List<Story> stories, float[] embedding)
+        {
+            // TODO: Implement semantic search logic
+            return stories;
+        }
+    }
+===== ./Services/StoryRepository.cs =====
+using Backend.Data;
+using Backend.Models;
+using Backend.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Pgvector.EntityFrameworkCore; // Needed for .CosineDistance()
+
+namespace Backend.Services;
+
+public class StoryRepository : IStoryRepository
+{
+    private readonly AppDbContext _context;
+
+    public StoryRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit)
+    {
+        // Convert the float array from Ollama to a pgvector Vector
+        var queryVector = new Pgvector.Vector(embedding);
+
+        // This query runs on the database server.
+        // 1. It calculates the "cosine distance" between the search query vector and each story's embedding.
+        //    A smaller distance means a better match (0 = identical, >0 = different).
+        // 2. It orders the results by this distance to get the best matches first.
+        // 3. It takes the top 5 results.
+        var results = await _context.Stories
+            .Select(s => new { Story = s, Distance = s.Embedding!.CosineDistance(queryVector) })
+            .OrderBy(r => r.Distance)
+            .Take(limit)
+            .ToListAsync();
+
+        // 4. It converts the list of results into the required tuple format (Story, Similarity).
+        //    Similarity is calculated as 1 - distance.
+        return results.Select(r => (r.Story, 1 - r.Distance));    
+    }
+
+    public async Task AddAsync(Story story)
+    {
+        _context.Stories.Add(story);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Story?> GetByIdAsync(int id) => await _context.Stories.FindAsync(id);
+    public async Task<bool> ExistsAsync(int id) => await _context.Stories.AnyAsync(s => s.Id == id);
+}

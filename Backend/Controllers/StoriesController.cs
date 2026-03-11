@@ -77,7 +77,7 @@ public class StoriesController : ControllerBase
             //if the story exists, return http 200 with the story data
             return Ok(storyDto);
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             // In a real application, you would log the full exception here for debugging.
             // For example: _logger.LogError(ex, "Error retrieving story with id {StoryId}", id);

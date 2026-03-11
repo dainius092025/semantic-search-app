@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
+using Backend.Services.Interfaces;
 
 namespace Backend.Controllers;
 
@@ -9,9 +10,9 @@ namespace Backend.Controllers;
 [Route("api/[controller]")]
 public class IngestionController : ControllerBase
 {
-    private readonly IngestionService _ingestionService;
+    private readonly IStoryIngestionService _ingestionService;
 
-    public IngestionController(IngestionService ingestionService)
+    public IngestionController(IStoryIngestionService ingestionService)
     {
         _ingestionService = ingestionService;
     }
