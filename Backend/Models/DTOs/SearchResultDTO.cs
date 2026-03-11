@@ -1,7 +1,5 @@
 
 
-using Microsoft.Net.Http.Headers;
-
 namespace Backend.Models.DTOs;
 
 public class SearchResultDTO

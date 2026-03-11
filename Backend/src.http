@@ -1,5 +1,12 @@
 @src_HostAddress = http://localhost:5162
 
+POST {{src_HostAddress}}/api/Ingestion/run
+Content-Type: application/json
+
+{}
+
+###
+
 POST {{src_HostAddress}}/api/Search
 Content-Type: application/json
 
@@ -7,9 +14,3 @@ Content-Type: application/json
   "query": "lighthouse",
   "limit": 5
 }
-
-###
-
-GET {{src_HostAddress}}/api/Stories/1
-
-###

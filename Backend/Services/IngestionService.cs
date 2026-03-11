@@ -8,7 +8,7 @@ namespace Backend.Services;
 // This service orchestrates the entire ingestion process, from loading raw data to generating embeddings and summaries, and finally saving everything to the database. 
 // It is designed to be efficient and scalable, leveraging asynchronous programming and parallel processing where appropriate.
 
-public class IngestionService
+public class IngestionService : IStoryIngestionService
 {
     private readonly IStoryRepository _repository;
     private readonly IOllamaService _ollama;
