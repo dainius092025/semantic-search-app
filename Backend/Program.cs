@@ -11,6 +11,9 @@ builder.Services.AddOpenApi();
 // Added controllers so the app can find our controllers
 builder.Services.AddControllers();
 
+// Register IngestionService so it can be injected into controllers and other services
+builder.Services.AddScoped<IngestionService>();
+
 // Register AppDbContext with PostgreSQL and pgvector
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), o => o.UseVector()));
