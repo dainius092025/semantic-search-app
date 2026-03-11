@@ -1,15 +1,43 @@
+# Variables for the API
 @src_HostAddress = http://localhost:5162
 
+###
+# ----------------------------------------------------
+# 1. INGESTION: Run this first to populate the database
+# ----------------------------------------------------
+# This endpoint reads all .txt files from the /Docs/Stories folder,
+# generates summaries and embeddings using Ollama, and saves them to the database.
+# This must be run successfully before searching will return any results.
+# @name IngestStories
+POST {{src_HostAddress}}/api/ingestion/run 
+
+###
+# ----------------------------------------------------
+# 2. SEARCH: Find stories based on semantic meaning
+# ----------------------------------------------------
+# Searches for stories using a query. The query is converted to an embedding
+# and compared against the story embeddings in the database.
+# This query is likely to match "Last_Bus_Home.txt".
+# @name SearchForStoryAboutForgiveness
 POST {{src_HostAddress}}/api/Search
 Content-Type: application/json
 
+
 {
-  "query": "lighthouse",
-  "limit": 5
+  "query": "a story about family and forgiveness",
+  "limit": 3
 }
 
 ###
-
+# ----------------------------------------------------
+# 3. GET STORY: Retrieve a single story by its ID
+# ----------------------------------------------------
+# After searching, you can use the ID from the search results
+# to fetch the full details of a specific story.
+# @name GetStoryById
 GET {{src_HostAddress}}/api/Stories/1
 
 ###
+# Get another story by its ID
+# @name GetStoryById2
+GET {{src_HostAddress}}/api/Stories/2

@@ -12,7 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // Register IngestionService so it can be injected into controllers and other services
-builder.Services.AddScoped<IngestionService>();
+builder.Services.AddScoped<IngestionService, IngestionService>();
 
 // Register AppDbContext with PostgreSQL and pgvector
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -35,3 +35,4 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+

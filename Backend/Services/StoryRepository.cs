@@ -26,7 +26,8 @@ public class StoryRepository : IStoryRepository
         // 2. It orders the results by this distance to get the best matches first.
         // 3. It takes the top 5 results.
         var results = await _context.Stories
-            .Select(s => new { Story = s, Distance = s.Embedding!.CosineDistance(queryVector) })
+            .Where(s => s.Embedding != null) // Ensure we only search stories that have an embedding
+            .Select(s => new { Story = s, Distance = s.Embedding!.CosineDistance(queryVector) }) // The '!' is safer now
             .OrderBy(r => r.Distance)
             .Take(limit)
             .ToListAsync();

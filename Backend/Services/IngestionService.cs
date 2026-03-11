@@ -23,6 +23,7 @@ public class IngestionService
 
     public async Task RunFullIngestionAsync()
     {
+        Console.WriteLine("starting");
         // 1. Load metadata and raw text from files
         var rawStories = await _dataLoader.LoadAllStoriesAsync();
 
@@ -45,5 +46,6 @@ public class IngestionService
         });
 
         await Task.WhenAll(tasks);
+        Console.WriteLine("comspleted");
     }
 }

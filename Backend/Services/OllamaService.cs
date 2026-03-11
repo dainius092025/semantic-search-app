@@ -1,5 +1,6 @@
 //this class implemets IOllamaSrvice, It is responsible for communicating with Ollama to generate embedding and summaries.
 
+using System.Text;
 using OllamaSharp.Models;
 using OllamaSharp;
 using Backend.Services.Interfaces;
@@ -95,18 +96,18 @@ public class OllamaService : IOllamaService
             //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
             var prompt = $"Summarize this short story in 1-2 sentences: {text}";
 
-            //empty string to hold the response from Ollama as it comes in chunks
-            var response = "";
+            // Use StringBuilder for efficient string concatenation in a loop.
+            var responseBuilder = new StringBuilder();
 
             //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
             await foreach (var chunk in _ollama.GenerateAsync(prompt))
             {
                                 //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
-                response += chunk?.Response ?? "";
+                responseBuilder.Append(chunk?.Response);
             }
 
             //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
-            return response.Trim();
+            return responseBuilder.ToString().Trim();
         });
 
 
