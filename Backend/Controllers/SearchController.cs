@@ -57,7 +57,7 @@ public class SearchController : ControllerBase
             var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
 
             //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
-            var storyResults = await _storyRepository.SearchAsync(embedding);
+            var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
 
          // Inside the .Select() loop:
             var results = storyResults.Select(result => new SearchResultDTO
@@ -65,6 +65,7 @@ public class SearchController : ControllerBase
                 Id = result.Story.Id,
                 Title = result.Story.Title,
                 Author = result.Story.Author,
+                Year = result.Story.Year,
                 Summary = result.Story.Summary,
                 // The similarity score (e.g., 0.95) is now provided by the repository.
                 Similarity = result.Similarity

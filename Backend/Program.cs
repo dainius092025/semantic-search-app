@@ -15,16 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), o => o.UseVector()));
 
-// 1. Get connection string from appsettings.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// 2. Register the DbContext with Npgsql and Vector support
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString, o => o.UseVector())); 
-
-// 3. Keep your service registrations
-builder.Services.AddScoped<IOllamaService, OllamaService>();
-builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 // Register OllamaService so it can be used throughout the app
 builder.Services.AddScoped<IOllamaService, OllamaService>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();

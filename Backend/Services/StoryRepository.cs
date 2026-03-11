@@ -15,7 +15,7 @@ public class StoryRepository : IStoryRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding)
+    public async Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit)
     {
         // Convert the float array from Ollama to a pgvector Vector
         var queryVector = new Pgvector.Vector(embedding);
@@ -28,7 +28,7 @@ public class StoryRepository : IStoryRepository
         var results = await _context.Stories
             .Select(s => new { Story = s, Distance = s.Embedding!.CosineDistance(queryVector) })
             .OrderBy(r => r.Distance)
-            .Take(5)
+            .Take(limit)
             .ToListAsync();
 
         // 4. It converts the list of results into the required tuple format (Story, Similarity).
