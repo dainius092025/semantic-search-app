@@ -72,9 +72,9 @@ public class SearchController : ControllerBase
 
             return Ok(results);
         }
-        catch (Exception ex)
+        catch (Exception)
         {   //if something fails, return HTTP 500
-            return StatusCode(500, ex.Message);
+            return StatusCode(500, "An unexpected error occured.");
         }
     }
 
