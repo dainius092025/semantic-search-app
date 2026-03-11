@@ -4,7 +4,7 @@ POST {{src_HostAddress}}/api/Search
 Content-Type: application/json
 
 {
-  "query": "dragon",
+  "query": "lighthouse",
   "limit": 5
 }
 

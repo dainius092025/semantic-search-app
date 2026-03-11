@@ -54,25 +54,35 @@ public class StoriesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetStoryById(int id)
     {
-        // ask the repository for the story with the given id
-        var story = await _storyRepository.GetByIdAsync(id);
-
-        //if the story does not exist, return http 404 not found
-        if (story == null)
+        try
         {
-            return NotFound();
+            // ask the repository for the story with the given id
+            var story = await _storyRepository.GetByIdAsync(id);
+
+            //if the story does not exist, return http 404 not found
+            if (story == null)
+            {
+                return NotFound();
+            }
+
+            var storyDto = new StoryDetailDTO // map to DTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            };
+            //if the story exists, return http 200 with the story data
+            return Ok(storyDto);
         }
-
-        var storyDto =  new StoryDetailDTO
+        catch (Exception ex)
         {
-            Id = story.Id,
-            Title = story.Title,
-            Author = story.Author,
-            Year = story.Year,
-            Genre = story.Genre,
-            Content = story.Content
-        };
-        //if the story exists, return http 200 with the story data
-        return Ok(storyDto);
+            // In a real application, you would log the full exception here for debugging.
+            // For example: _logger.LogError(ex, "Error retrieving story with id {StoryId}", id);
+            // Then, return a generic error message to the client.
+            return StatusCode(500, "An internal server error occurred.");
+        }
     }
 }
