@@ -23,29 +23,42 @@ public class IngestionService
 
     public async Task RunFullIngestionAsync()
     {
-        Console.WriteLine("starting");
+        Console.WriteLine("Starting ingestion process...");
         // 1. Load metadata and raw text from files
         var rawStories = await _dataLoader.LoadAllStoriesAsync();
 
-        // 2. Parallel Processing (The "Level 3" Flowchart)
-        // We use Task.WhenAll to process multiple stories at the same time
-        var tasks = rawStories.Select(async story =>
+        // 2. Sequential Processing
+        // We process stories one by one because the DbContext is not thread-safe.
+        foreach (var story in rawStories)
         {
-            // Check if story already exists to avoid duplicates
-            if (await _repository.ExistsAsync(story.Id)) return;
+            try 
+            {
+                // Check if story already exists to avoid duplicates
+                if (await _repository.ExistsAsync(story.Id))
+                {
+                    Console.WriteLine($"Story '{story.Title}' (ID: {story.Id}) already exists. Skipping.");
+                    continue;
+                }
 
-            // Generate Embedding (Retries are handled inside OllamaService)
-            var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
-            story.Embedding = new Pgvector.Vector(vector);
+                Console.WriteLine($"Processing story: {story.Title}...");
 
-            // Generate Summary
-            story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+                // Generate Embedding
+                var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+                story.Embedding = new Pgvector.Vector(vector);
 
-            // 3. Save to Database (PostgreSQL)
-            await _repository.AddAsync(story);
-        });
+                // Generate Summary
+                story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
 
-        await Task.WhenAll(tasks);
-        Console.WriteLine("comspleted");
+                // 3. Save to Database
+                await _repository.AddAsync(story);
+                Console.WriteLine($"Successfully ingested: {story.Title}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing story '{story.Title}': {ex.Message}");
+            }
+        }
+
+        Console.WriteLine("Ingestion process completed.");
     }
 }

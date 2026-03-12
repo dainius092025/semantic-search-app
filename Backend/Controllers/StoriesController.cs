@@ -79,9 +79,8 @@ public class StoriesController : ControllerBase
         }
         catch (Exception ex)
         {
-            // In a real application, you would log the full exception here for debugging.
-            // For example: _logger.LogError(ex, "Error retrieving story with id {StoryId}", id);
-            // Then, return a generic error message to the client.
+            // Log the full exception for debugging
+            Console.WriteLine($"Error retrieving story with id {id}: {ex.Message}");
             return StatusCode(500, "An internal server error occurred.");
         }
     }

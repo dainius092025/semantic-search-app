@@ -19,6 +19,16 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
+  ollama-pull-models:
+    image: ollama/ollama
+    container_name: ollama_pull_models
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: /bin/sh
+    command: -c "sleep 5; ollama pull nomic-embed-text; ollama pull gemma3:1b"
+    depends_on:
+      - ollama
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: semantic_pgadmin

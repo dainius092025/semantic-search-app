@@ -71,46 +71,37 @@ public class OllamaService : IOllamaService
                         //accepts plain text as input
     public async Task<float[]> GenerateEmbeddingAsync(string text)
     {
-        //sends the text to Ollama and asks for an embedding
-                    //"await" means to wait for ollama to respond before continuing
-                                                            //here we tell ollama what we want
         var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
             {
-                //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
+                // Reverting to standard name; Ollama usually aliases :latest to the base name
                 Model = "nomic-embed-text",
-
-                //the text we want to  convertto vector
                 Input = new List<string> { text }
             })
         );
 
-        //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
         return result.Embeddings[0].Select(d => (float)d).ToArray();
     }
 
-    //this method sends text to alllama and gets back the a generated summary 
     public async Task<string> GenerateSummaryAsync(string text)
     {
         return await RetryAsync(async () =>
         {        
-            //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
-            var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+            var prompt = $"Summarize the following story in exactly one or two sentences: {text}";
+            var response = "";
 
-            // Use StringBuilder for efficient string concatenation in a loop.
-            var responseBuilder = new StringBuilder();
-
-            //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
-            await foreach (var chunk in _ollama.GenerateAsync(prompt))
+            // Using the explicit gemma3:1b model we pulled
+            await foreach (var chunk in _ollama.GenerateAsync(new GenerateRequest
             {
-                                //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
-                responseBuilder.Append(chunk?.Response);
+                Model = "gemma3:1b",
+                Prompt = prompt,
+                Stream = true
+            }))
+            {
+                response += chunk?.Response ?? "";
             }
 
-            //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
-            return responseBuilder.ToString().Trim();
+            return response.Trim();
         });
-
-
     }
 }
 
