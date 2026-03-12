@@ -96,8 +96,18 @@ public class OllamaService : IOllamaService
     {
         return await RetryAsync(async () =>
         {        
-            //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
-            var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+            //we create a prompt for ollama asking it to summarize the story in 1-2 sentences and we include formatting instructions so the model returns only the text without introductions ot extra commentary.
+            var prompt = $"""
+            Summarize the following short story in 1-2 sentences.
+
+            Return only the summary text.
+            Do not add an introduction.
+            Do not say "Here is a summary".
+            Do not use bullet points.
+
+            Story:
+            {text}
+            """;
 
             //empty string to hold the response from Ollama as it comes in chunks
             var response = "";
@@ -110,7 +120,15 @@ public class OllamaService : IOllamaService
             }
 
             //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
-            return response.Trim();
+            var cleaned = response.Trim();
+            //remove extra LLM sentences
+            var parts = cleaned.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length > 1)
+            {
+                cleaned = parts.Last();
+            }
+            return cleaned.Trim();
         });
 
 

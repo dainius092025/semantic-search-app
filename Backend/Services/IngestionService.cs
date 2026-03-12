@@ -31,17 +31,36 @@ public class IngestionService : IStoryIngestionService
         {
             // Check if story already exists to avoid duplicates
             if (await _repository.ExistsAsync(story.Id))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Skipping story {story.Id} - already exists in database.");
+                Console.ResetColor();
                 continue;
+            }
 
-            // Generate Embedding
-            var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
-            story.Embedding = new Pgvector.Vector(vector);
+                // Generate Embedding
+                var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+                story.Embedding = new Pgvector.Vector(vector);
 
-            // Generate Summary
-            story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+                // Generate Summary only if content is not empty
+                //This prevents sending empty text to the LLM, which can produce confusing responses.
+                if (!string.IsNullOrWhiteSpace(story.Content))
+                {
+                    // Generate Summary
+                    story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    story.Summary = "No summary available.";
+                    Console.ResetColor();
+                }
 
-            // 3. Save to Database
-            await _repository.AddAsync(story);
+                // 3. Save to Database
+                await _repository.AddAsync(story);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Ingested story {story.Id} successfully.");
+                Console.ResetColor();
         }
     }
 }

@@ -11,6 +11,6 @@ POST {{src_HostAddress}}/api/Search
 Content-Type: application/json
 
 {
-  "query": "happy life",
+  "query": "lonliness by the sea",
   "limit": 5
 }
