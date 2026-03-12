@@ -25,6 +25,12 @@ builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 var app = builder.Build();
 
+// Apply pending EF Core migrations automatically on startup, so we do not need to type `dotnet ef database update` we start from scratch
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 // Enable Swagger in development mode
 if (app.Environment.IsDevelopment())
 {

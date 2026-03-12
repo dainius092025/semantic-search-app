@@ -12,7 +12,7 @@ namespace Backend.Controllers;
 // this defines the SearchController class, which will handle all search related endpoints, such as POST /api/search
 public class SearchController : ControllerBase
 {
-
+    
     private readonly IOllamaService _ollamaService;//Dependancy: service that communicats with the Ollama API to perform semantic search and get summaries. we will use it to convert the users search text into an embedding vector
 
     private readonly IStoryRepository _storyRepository;//Dependancy: repository that gives access to the story data. We will use it to search stories using the embedding vectors we get from the OllamaService
@@ -36,6 +36,8 @@ public class SearchController : ControllerBase
                                             //fromBody tells ASP.NET to read JSON from the request body and convert it into a SearchRequestDTO object automaticcaly.
     public async Task<IActionResult> Search([FromBody] SearchRequestDTO request)
     {
+
+        Console.WriteLine("=== Search endpoint was hit ===");
         //checkif the query is empty or null, if it is return http 400 bad request with a message.
         if (string.IsNullOrWhiteSpace(request.Query))
         {
@@ -73,9 +75,12 @@ public class SearchController : ControllerBase
 
             return Ok(results);
         }
-        catch (Exception)
+        catch (Exception ex)
         {   //if something fails, return HTTP 500
-            return StatusCode(500, "An unexpected error occured. - developer");
+            Console.WriteLine("=== ERROR ===");
+            Console.WriteLine(ex.ToString());
+
+            return StatusCode(500, ex.Message);
         }
     }
 
