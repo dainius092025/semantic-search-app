@@ -1,6 +1,5 @@
 //this class implemets IOllamaSrvice, It is responsible for communicating with Ollama to generate embedding and summaries.
 
-using System.Text;
 using OllamaSharp.Models;
 using OllamaSharp;
 using Backend.Services.Interfaces;
@@ -17,6 +16,8 @@ public class OllamaService : IOllamaService
                                     //the name of the connection
     private readonly OllamaApiClient _ollama;
 
+    private readonly string _summaryModel;
+
     // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
     public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
     {
@@ -25,6 +26,9 @@ public class OllamaService : IOllamaService
         // This makes the application more flexible for different environments.
         var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
         _ollama = new OllamaApiClient(ollamaUrl);
+
+     _summaryModel = configuration["Ollama:SummaryModel"] ?? "llama3.2";
+    _ollama.SelectedModel = _summaryModel;
     }
 
 
@@ -81,8 +85,7 @@ public class OllamaService : IOllamaService
 
                 //the text we want to  convertto vector
                 Input = new List<string> { text }
-            })
-        );
+            }) );
 
         //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
         return result.Embeddings[0].Select(d => (float)d).ToArray();
@@ -93,21 +96,39 @@ public class OllamaService : IOllamaService
     {
         return await RetryAsync(async () =>
         {        
-            //we create a prompt that we will send to Ollama. A prompt is just the text we send to the AI to tell it what we want. In this case, we are asking it to summarize the story in 1-2 sentences. We include the story text in the prompt so Ollama knows what to summarize.
-            var prompt = $"Summarize this short story in 1-2 sentences: {text}";
+            //we create a prompt for ollama asking it to summarize the story in 1-2 sentences and we include formatting instructions so the model returns only the text without introductions ot extra commentary.
+            var prompt = $"""
+            Summarize the following short story in 1-2 sentences.
 
-            // Use StringBuilder for efficient string concatenation in a loop.
-            var responseBuilder = new StringBuilder();
+            Return only the summary text.
+            Do not add an introduction.
+            Do not say "Here is a summary".
+            Do not use bullet points.
+
+            Story:
+            {text}
+            """;
+
+            //empty string to hold the response from Ollama as it comes in chunks
+            var response = "";
 
             //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
             await foreach (var chunk in _ollama.GenerateAsync(prompt))
             {
                                 //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
-                responseBuilder.Append(chunk?.Response);
+                response += chunk?.Response ?? "";
             }
 
             //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
-            return responseBuilder.ToString().Trim();
+            var cleaned = response.Trim();
+            //remove extra LLM sentences
+            var parts = cleaned.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length > 1)
+            {
+                cleaned = parts.Last();
+            }
+            return cleaned.Trim();
         });
 
 

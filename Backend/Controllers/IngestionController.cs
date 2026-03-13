@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Backend.Services;
+using Backend.Services.Interfaces;
 
 namespace Backend.Controllers;
 
@@ -10,13 +9,11 @@ namespace Backend.Controllers;
 [Route("api/[controller]")]
 public class IngestionController : ControllerBase
 {
-    private readonly IngestionService _ingestionService;
-    private readonly ILogger<IngestionController> _logger;
+    private readonly IStoryIngestionService _ingestionService;
 
-    public IngestionController(IngestionService ingestionService, ILogger<IngestionController> logger)
+    public IngestionController(IStoryIngestionService ingestionService)
     {
         _ingestionService = ingestionService;
-        _logger = logger;
     }
 
     [HttpPost("run")]
@@ -29,8 +26,10 @@ public class IngestionController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred during the ingestion process.");
-            return StatusCode(500, $"Ingestion failed: {ex.Message}");
+            Console.WriteLine(ex);
+            return StatusCode(500, "Ingestion failed due to an internal server error. - the developer");
         }
     }
 }
+
+

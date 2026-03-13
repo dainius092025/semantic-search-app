@@ -12,7 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // Register IngestionService so it can be injected into controllers and other services
-builder.Services.AddScoped<IngestionService, IngestionService>();
+builder.Services.AddScoped<IStoryIngestionService, IngestionService>();
 
 // Register AppDbContext with PostgreSQL and pgvector
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -25,6 +25,12 @@ builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 var app = builder.Build();
 
+// Apply pending EF Core migrations automatically on startup, so we do not need to type `dotnet ef database update` we start from scratch
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 // Enable Swagger in development mode
 if (app.Environment.IsDevelopment())
 {
@@ -35,4 +41,3 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
-

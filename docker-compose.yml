@@ -18,6 +18,20 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+  
+  ollama-init:
+    image: curlimages/curl:latest
+    container_name: semantic_ollama_init
+    depends_on:
+      - ollama
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sleep 5
+        curl -s http://ollama:11434/api/pull -d '{"model":"nomic-embed-text:latest","stream":false}'
+        curl -s http://ollama:11434/api/pull -d '{"model":"gemma3:1b","stream":false}'
+    restart: "no"
 
   pgadmin:
     image: dpage/pgadmin4

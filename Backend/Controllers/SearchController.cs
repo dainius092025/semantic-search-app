@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Interfaces;
 using Backend.Models.DTOs;
-using Microsoft.Extensions.Logging;
 
 namespace Backend.Controllers;
 
@@ -13,22 +12,18 @@ namespace Backend.Controllers;
 // this defines the SearchController class, which will handle all search related endpoints, such as POST /api/search
 public class SearchController : ControllerBase
 {
-
+    
     private readonly IOllamaService _ollamaService;//Dependancy: service that communicats with the Ollama API to perform semantic search and get summaries. we will use it to convert the users search text into an embedding vector
 
     private readonly IStoryRepository _storyRepository;//Dependancy: repository that gives access to the story data. We will use it to search stories using the embedding vectors we get from the OllamaService
 
-    private readonly ILogger<SearchController> _logger;
-
     //this is constructor, ASP.NET will automatically inject the dependencies (OllamaService and StoryRepository). this means we do not manually creaet these objects
-    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository, ILogger<SearchController> logger)
+    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository)
     {
         //store the injected Ollama service in a private variable
         _ollamaService = ollamaService;
 
         _storyRepository = storyRepository;
-
-        _logger = logger;
     }
 
     //this attribute marks this method as an HTTP POST endpoint, the final route becomes: POST /api/search
@@ -41,8 +36,10 @@ public class SearchController : ControllerBase
                                             //fromBody tells ASP.NET to read JSON from the request body and convert it into a SearchRequestDTO object automaticcaly.
     public async Task<IActionResult> Search([FromBody] SearchRequestDTO request)
     {
+
+        Console.WriteLine("=== Search endpoint was hit ===");
         //checkif the query is empty or null, if it is return http 400 bad request with a message.
-        if (string.IsNullOrWhiteSpace(request.Query))
+        if (request == null || string.IsNullOrWhiteSpace(request.Query))
         {
             return BadRequest("Query cannot be empty");
         }
@@ -64,7 +61,7 @@ public class SearchController : ControllerBase
             //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
             var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
 
-         // Inside the .Select() loop:
+         // // Map repository results to SearchResultDTO objects before returning them to the client
             var results = storyResults.Select(result => new SearchResultDTO
             {
                 Id = result.Story.Id,
@@ -80,8 +77,10 @@ public class SearchController : ControllerBase
         }
         catch (Exception ex)
         {   //if something fails, return HTTP 500
-            _logger.LogError(ex, "An unexpected error occurred during search for query: {Query}", request.Query);
-            return StatusCode(500, "An internal server error occurred while searching.");
+            Console.WriteLine("=== ERROR ===");
+            Console.WriteLine(ex.ToString());
+
+            return StatusCode(500, ex.Message);
         }
     }
 
