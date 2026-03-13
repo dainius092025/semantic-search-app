@@ -1,0 +1,39 @@
+.shelf-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.shelf-container {
+  position: relative;
+  width: 80%;
+  max-width: 900px;
+}
+
+.shelf-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hotspot {
+  position: absolute;
+  background: rgba(255, 255, 255, 0);
+  cursor: pointer;
+}
+
+.hotspot:focus,
+.hotspot:focus-visible,
+.hotspot:active {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(200, 134, 10, 0.6);
+}
+
+.story-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f8f8f8;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
