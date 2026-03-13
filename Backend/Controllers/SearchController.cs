@@ -39,7 +39,7 @@ public class SearchController : ControllerBase
 
         Console.WriteLine("=== Search endpoint was hit ===");
         //checkif the query is empty or null, if it is return http 400 bad request with a message.
-        if (string.IsNullOrWhiteSpace(request.Query))
+        if (request == null || string.IsNullOrWhiteSpace(request.Query))
         {
             return BadRequest("Query cannot be empty");
         }
@@ -61,7 +61,7 @@ public class SearchController : ControllerBase
             //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
             var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
 
-         // Inside the .Select() loop:
+         // // Map repository results to SearchResultDTO objects before returning them to the client
             var results = storyResults.Select(result => new SearchResultDTO
             {
                 Id = result.Story.Id,

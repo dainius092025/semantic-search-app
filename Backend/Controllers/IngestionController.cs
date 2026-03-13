@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Backend.Services;
 using Backend.Services.Interfaces;
 
 namespace Backend.Controllers;
@@ -27,8 +26,8 @@ public class IngestionController : ControllerBase
         }
         catch (Exception ex)
         {
-            var errorMessage = ex.InnerException?.Message ?? ex.Message;
-            return StatusCode(500, $"Ingestion failed: {errorMessage}");
+            Console.WriteLine(ex);
+            return StatusCode(500, "Ingestion failed due to an internal server error. - the developer");
         }
     }
 }
