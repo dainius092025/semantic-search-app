@@ -1,0 +1,136 @@
+.card {
+  background: #fff;
+  border: 1px solid var(--parchment-mid);
+  border-radius: var(--radius-md);
+  padding: 22px 24px 18px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s ease both;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--amber-light);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.genreBadge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.year {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.author {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+
+.excerpt {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+  margin-bottom: 14px;
+}
+
+.scoreWrap {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.scoreTrack {
+  height: 8px;
+  background: #e5dcc7;
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid #d8ccb2;
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04) inset;
+}
+
+.scoreMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scoreLabel {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.scoreNum {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--parchment-dark);
+}
+
+.readMore {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.2s;
+}
+
+.card:hover .readMore {
+  gap: 7px;
+}
+
+.storyId {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: monospace;
+}
