@@ -28,8 +28,8 @@ Content-Type: application/json
 
 
 {
-  "query": "Harper Quinn",
-  "limit": 1
+  "query": "After thirty-two years of solitary duty, Henrik, the lighthouse keeper, finally relinquished his post as the automated systems replaced his vital role, returning to a quiet existence where he continued to watch over the sea with a familiar, automated light.",
+  "limit": 10
 }
 
 ###
@@ -44,4 +44,4 @@ GET {{src_HostAddress}}/api/Stories/1
 ###
 #Get another story by its ID
 #@name GetStoryById2
-GET {{src_HostAddress}}/api/Stories/2
+GET {{src_HostAddress}}/api/Stories/8
