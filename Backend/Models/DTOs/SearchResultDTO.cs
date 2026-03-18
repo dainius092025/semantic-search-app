@@ -9,6 +9,5 @@ public class SearchResultDTO
     public string Author { get; set; } = string.Empty;
     public int Year { get; set; }
     public string Summary { get; set; } = string.Empty; // The 1-2 sentence AI summary
-    public string Content { get; set;}
     public double Similarity { get; set; }              // The Cosine Similarity score
 }

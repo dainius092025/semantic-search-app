@@ -26,8 +26,8 @@ Content-Type: application/json
 
 
 {
-  "query": "2019",
-  "limit": 1
+  "query": "dystopian life",
+  "limit": 10
 }
 
 
@@ -52,10 +52,10 @@ GET {{src_HostAddress}}/api/Stories/2
 #Searches title, summary, and content using direct keyword matching.
 #Use this to test exact words or phrases instead of semantic meaning.
 #@name KeywordSearch
-POST {{src_HostAddress}}/api/Search/keyword
+POST {{src_HostAddress}}/api/Search/metadata
 Content-Type: application/json
 
 {
-  "query": "lighthouse",
+  "query": "",
   "limit": 5
 }

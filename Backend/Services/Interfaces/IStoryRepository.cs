@@ -44,7 +44,7 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID to check
         Task<bool> ExistsAsync(int id);
 
-        //searches stories by keyword in title, author, genre, year, content
-        Task<List<Story>> SearchByKeywordAsync(string query);
+        //searches stories by keyword in metadata
+        Task<List<Story>> SearchByMetadataAsync(string query);
     }
 }                     

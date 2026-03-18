@@ -46,15 +46,18 @@ public class StoryRepository : IStoryRepository
     public async Task<Story?> GetByIdAsync(int id) => await _context.Stories.FindAsync(id);
     public async Task<bool> ExistsAsync(int id) => await _context.Stories.AnyAsync(s => s.Id == id);
 
-    //searches title, author, year, genre, content using simple matching "contains
-    public async Task<List<Story>> SearchByKeywordAsync(string query)
+    //searches only in metadata: title, author, year, genre,  using simple matching "contains"
+    public async Task<List<Story>> SearchByMetadataAsync(string query)
     {
+        var normalizedQuery = query.Trim().ToLower();
         var results = await _context.Stories
-            .Where (s => s.Title.Contains(query) ||
-                    s. Author.Contains(query) ||
+            .Where (s => s.Title.ToLower().Contains(normalizedQuery) ||//i has to be case sensitive.
+                    s. Author.ToLower().Contains(normalizedQuery) ||
                     s.Year.ToString() == query||
-                    s.Genre.Contains(query) ||
-                    s.Content.Contains(query))
+                    s.Genre.ToLower().Contains(normalizedQuery))
+            .OrderByDescending(s => s.Title.ToLower().Contains(normalizedQuery))//title comes first
+            .ThenByDescending(s => s.Author.ToLower().Contains(normalizedQuery))//then this
+            .ThenByDescending(s => s.Genre.ToLower().Contains(normalizedQuery))//and then this
                     .ToListAsync();
 
         return results;

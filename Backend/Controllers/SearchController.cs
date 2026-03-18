@@ -85,10 +85,10 @@ public class SearchController : ControllerBase
         }
     }
 
-    //POST /api/search/keyword endpoint does a keyword based search instead of semantic.
+    //POST /api/search/metadata endpoint does a metadata based search instead of semantic.
     //ok, again this bit tells to ASP.NET about Post request
-    [HttpPost("keyword")]
-    public async Task<IActionResult> KeywordSearch([FromBody] SearchRequestDTO request)
+    [HttpPost("metadata")]
+    public async Task<IActionResult> MetadataSearch([FromBody] SearchRequestDTO request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.Query))
         {
@@ -108,7 +108,7 @@ public class SearchController : ControllerBase
         try
         {
             //calls repository method and sends keyword query to DB and returns a list of mathcing story objects
-            var stories = await _storyRepository.SearchByKeywordAsync(request.Query);
+            var stories = await _storyRepository.SearchByMetadataAsync(request.Query);
 
             //here happens mapping to dto
             var results = stories
@@ -119,7 +119,7 @@ public class SearchController : ControllerBase
                     Title = Story.Title,
                     Author = Story.Author,
                     Year = Story.Year,
-                    Content = Story.Content,
+                    Summary = Story.Summary,
                     Similarity = 0
                 })
                 .ToList();//executes transformation and converts results to a list
