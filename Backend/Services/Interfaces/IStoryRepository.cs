@@ -28,7 +28,7 @@ namespace Backend.Services.Interfaces
         // IEnumerable<(Story Story, double Similarity)> = returns a list of tuples, each with a story and its similarity score.
         // SearchAsync             = searches the database
         // float[] embedding       = accepts a vector to compare against
-       Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit);
+        Task<IEnumerable<(Story Story, double Similarity)>> SearchAsync(float[] embedding, int limit);
 
         // Gets one story from the database by its ID. Returns null if the story does not exist.
         // Used by the story detail endpoint.
@@ -43,5 +43,8 @@ namespace Backend.Services.Interfaces
         // ExistsAsync  = checks if story already exists
         // int id       = accepts the story ID to check
         Task<bool> ExistsAsync(int id);
+
+        //searches stories by keyword in title, author, genre, year, content
+        Task<List<Story>> SearchByKeywordAsync(string query);
     }
-} 
+}

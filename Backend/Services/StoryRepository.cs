@@ -45,4 +45,18 @@ public class StoryRepository : IStoryRepository
 
     public async Task<Story?> GetByIdAsync(int id) => await _context.Stories.FindAsync(id);
     public async Task<bool> ExistsAsync(int id) => await _context.Stories.AnyAsync(s => s.Id == id);
+
+    //searches title, author, year, genre, content using simple matching "contains
+    public async Task<List<Story>> SearchByKeywordAsync(string query)
+    {
+        var results = await _context.Stories
+            .Where (s => s.Title.Contains(query) ||
+                    s. Author.Contains(query) ||
+                    s.Year.ToString() == query||
+                    s.Genre.Contains(query) ||
+                    s.Content.Contains(query))
+                    .ToListAsync();
+
+        return results;
+    }
 }
