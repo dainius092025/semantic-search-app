@@ -26,9 +26,10 @@ Content-Type: application/json
 
 
 {
-  "query": "Harper Quinn",
+  "query": "2019",
   "limit": 1
 }
+
 
 ###
 #----------------------------------------------------
@@ -43,3 +44,18 @@ GET {{src_HostAddress}}/api/Stories/1
 #Get another story by its ID
 #@name GetStoryById2
 GET {{src_HostAddress}}/api/Stories/2
+
+###
+#----------------------------------------------------
+#KEYWORD SEARCH: Find stories by exact text match
+#----------------------------------------------------
+#Searches title, summary, and content using direct keyword matching.
+#Use this to test exact words or phrases instead of semantic meaning.
+#@name KeywordSearch
+POST {{src_HostAddress}}/api/Search/keyword
+Content-Type: application/json
+
+{
+  "query": "lighthouse",
+  "limit": 5
+}

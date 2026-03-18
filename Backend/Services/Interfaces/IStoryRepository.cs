@@ -47,4 +47,4 @@ namespace Backend.Services.Interfaces
         //searches stories by keyword in title, author, genre, year, content
         Task<List<Story>> SearchByKeywordAsync(string query);
     }
-}
+}                     

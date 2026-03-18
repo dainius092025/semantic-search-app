@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Interfaces;
 using Backend.Models.DTOs;
+using Backend.Models;
 
 namespace Backend.Controllers;
 
@@ -84,22 +85,54 @@ public class SearchController : ControllerBase
         }
     }
 
+    //POST /api/search/keyword endpoint does a keyword based search instead of semantic.
+    //ok, again this bit tells to ASP.NET about Post request
+    [HttpPost("keyword")]
+    public async Task<IActionResult> KeywordSearch([FromBody] SearchRequestDTO request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Query))
+        {
+            return BadRequest("Query cannot be empty");
+        }
 
+        if (request.Query.Trim().Length < 3)
+        {
+            return BadRequest("Query must be at least 3 characters long");
+        }
 
+        if (request.Limit <= 0 || request.Limit > 20)
+        {
+            request.Limit = 5;
+        }
+        
+        try
+        {
+            //calls repository method and sends keyword query to DB and returns a list of mathcing story objects
+            var stories = await _storyRepository.SearchByKeywordAsync(request.Query);
+
+            //here happens mapping to dto
+            var results = stories
+                .Take(request.Limit)//only return the number of results requested
+                .Select(Story => new SearchResultDTO//convert each story into dto
+                {
+                    Id = Story.Id,
+                    Title = Story.Title,
+                    Author = Story.Author,
+                    Year = Story.Year,
+                    Content = Story.Content,
+                    Similarity = 0
+                })
+                .ToList();//executes transformation and converts results to a list
+            return Ok(results);
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine("KEYWORD SEARCH ERROR");
+            Console.WriteLine(ex.ToString());
+
+            return StatusCode(500, "an internal server error occured - the developer");
+        }
+
+    }
 }
-
-
-/* 
-backend search flow
-User types query
-      ↓
-POST /api/search
-      ↓
-SearchController
-      ↓
-OllamaService → convert text → embedding vector
-      ↓
-StoryRepository → search stories by vector similarity
-      ↓
-Return SearchResultDTO list 
-*/
