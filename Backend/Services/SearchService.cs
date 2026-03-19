@@ -31,16 +31,37 @@ public class SearchService : ISearchService
         // Now we do metadata (keyword-based) search.This finds stories that match exact words or phrases in fields like title, author
         var metadataResults = await _storyRepository.SearchByMetadataAsync(request.Query);
 
-    // and lastly we map semantic search results into DTOs for the API response, at this stage the similarity score is only semantic
-        var combinedResults = semanticResults
-            .Select(result => new SearchResultDTO
+        // collecting all unique storu IDs from both semantic(comes from vector similarity) and metadata (comes from keyword matching) results. SO using UNION ensures that stories appearing in both results sets are not diplicates and found by only one method are still included.Thi creates a unified set of conditions for hybrid ranking.
+        var allStoryIds = semanticResults
+            .Select(result => result.Story.Id)
+            .Union(metadataResults.Select(story => story.Id))
+            .ToList();
+
+        //Build one combined result list from all unique story IDs. thisa allows hybrid search include: stories found by both methods, semantic-only stories, metadata-only stories.
+        var combinedResults = allStoryIds
+            .Select(id =>
             {
-                Id = result.Story.Id,
-                Title = result.Story.Title,
-                Author = result.Story.Author,
-                Year = result.Story.Year,
-                Summary = result.Story.Summary,
-                Similarity = result.Similarity
+                //From the list of semantic results, find the first item where the story’s ID matches the given ID. If none is found, return a default value.                                  
+                                                                    //Take each result, and check if its story ID equals the ID we are looking for
+                                                    //first item that matches the condition, or a default value if nothing matches.
+                                    //From the list of semantic results
+                var semanticMatch = semanticResults.FirstOrDefault(result => result.Story.Id == id);
+
+                var metadataMatch = metadataResults.FirstOrDefault(story => story.Id == id);
+
+                var hasSemantic = semanticResults.Any(result => result.Story.Id == id);
+                //If we have a semantic match, use that story. Otherwise, use the metadata match.
+                var story = hasSemantic ? semanticMatch.Story : metadataMatch!;
+
+                return new SearchResultDTO
+                {
+                    Id = story.Id,
+                    Title = story.Title,
+                    Author = story.Author,
+                    Year = story.Year,
+                    Summary = story.Summary,
+                    Similarity = hasSemantic ? semanticMatch.Similarity : 0
+                };
             })
             .ToList();
 
