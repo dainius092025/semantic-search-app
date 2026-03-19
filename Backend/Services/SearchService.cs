@@ -10,6 +10,11 @@ public class SearchService : ISearchService
     private readonly IOllamaService _ollamaService;
     private readonly IStoryRepository _storyRepository;
 
+    // Defines weighting for hybrid ranking.
+    // Semantic relevance is prioritized, but keyword matches still influence results.
+    private const double SemanticWeight = 0.7;
+    private const double KeywordWeight = 0.3;
+
     // Dependencies are injected via constructor:
     // - IOllamaService: generates embeddings for semantic search
     // - IStoryRepository: provides access to story data and search queries
@@ -79,7 +84,7 @@ public class SearchService : ISearchService
                 : 0.0;
 
             // Combine both scores into a final relevance score
-            dto.Similarity = (semanticScore * 0.7) + (keywordScore * 0.3);
+            dto.Similarity = (semanticScore * SemanticWeight) + (keywordScore * KeywordWeight);
         }
         //finaly we organize results by final score (highest first) and limit the output
         return combinedResults
