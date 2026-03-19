@@ -23,6 +23,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IOllamaService, OllamaService>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
+//this bit tells ASP.NET dependancy injection(when someone asks for ISearchServic, create and privide a SearcHService)
+builder.Services.AddScoped<ISearchService, SearchService>();
+
 var app = builder.Build();
 
 // Apply pending EF Core migrations automatically on startup, so we do not need to type `dotnet ef database update` we start from scratch

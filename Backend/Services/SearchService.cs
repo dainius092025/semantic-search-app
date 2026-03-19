@@ -1,0 +1,95 @@
+using Backend.Models;
+using Backend.Models.DTOs;
+using Backend.Services.Interfaces;
+
+namespace Backend.Services;
+
+// Service responsible for handling all search-related logic. it combines semantic search (embedding-based) and metadata search (keyword-based) and applies weighted ranking to return the most relevant results.
+public class SearchService : ISearchService
+{
+    private readonly IOllamaService _ollamaService;
+    private readonly IStoryRepository _storyRepository;
+
+    // Dependencies are injected via constructor:
+    // - IOllamaService: generates embeddings for semantic search
+    // - IStoryRepository: provides access to story data and search queries
+    public SearchService(IOllamaService ollamaService, IStoryRepository storyRepository)
+    {
+        _ollamaService = ollamaService;
+        _storyRepository = storyRepository;
+    }
+
+    // Performs hybrid search by combining semantic similarity and metadata matching. Semantic search finds stories based on meaning using embeddings, while metadata search finds exact matches (title, author, genre, etc.).
+    public async Task<List<SearchResultDTO>> HybridSearchAsync(SearchRequestDTO request)
+    {
+         // Firstly we convert the user's query into an embedding vector using the Ollama service. This allows us to compare the meaning of the query with stored story embeddings.         
+        var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
+
+        // Then we perform semantic search in the database and return stories with a similarity score based on how close they are to the query embedding.
+        var semanticResults = await _storyRepository.SearchAsync(embedding, request.Limit);
+
+        // Now we do metadata (keyword-based) search.This finds stories that match exact words or phrases in fields like title, author
+        var metadataResults = await _storyRepository.SearchByMetadataAsync(request.Query);
+
+    // and lastly we map semantic search results into DTOs for the API response, at this stage the similarity score is only semantic
+        var combinedResults = semanticResults
+            .Select(result => new SearchResultDTO
+            {
+                Id = result.Story.Id,
+                Title = result.Story.Title,
+                Author = result.Story.Author,
+                Year = result.Story.Year,
+                Summary = result.Story.Summary,
+                Similarity = result.Similarity
+            })
+            .ToList();
+
+
+        // we need to combine semantic and keyword results using weighted ranking. Semantic score represents meaning similarity (0–1), keyword score is binary (1 or 0, exists or not). The final score is calculated as:
+        // 70% semantic relevance + 30% keyword relevance.
+        foreach (var dto in combinedResults)
+        {   
+            // Preserve the original semantic similarity score
+            var semanticScore = dto.Similarity;
+
+            // Check if the current story also appears in metadata search results. If yesthen strong keyword match (1), otherwise no match (0)
+            var keywordScore = metadataResults.Any(story => story.Id == dto.Id)
+                ? 1.0
+                : 0.0;
+
+            // Combine both scores into a final relevance score
+            dto.Similarity = (semanticScore * 0.7) + (keywordScore * 0.3);
+        }
+        //finaly we organize results by final score (highest first) and limit the output
+        return combinedResults
+            .OrderByDescending(r => r.Similarity)
+            .Take(request.Limit)
+            .ToList();
+
+    }
+
+
+    // Performs metadata-based (keyword) search only.This search matches exact words or phrases in fields: title, author, genre, year, without using embeddings.
+    public async Task<List<SearchResultDTO>> MetadataSearchAsync(SearchRequestDTO request)
+    {
+        // First we query the database for stories that match the keyword search
+        var stories = await _storyRepository.SearchByMetadataAsync(request.Query);
+
+        // Thenwe map the results to DTOs and limit the number of returned items
+        var results = stories
+            .Take(request.Limit)
+            .Select(story => new SearchResultDTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Summary = story.Summary,
+
+            // Metadata search does not calculate similarity, so we set it to 0 
+                Similarity = 0
+            })
+            .ToList();
+        return results;
+    }
+} 

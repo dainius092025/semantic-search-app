@@ -15,7 +15,7 @@ Content-Type: application/json
 
 ###
 #----------------------------------------------------
-#SEARCH: Find stories based on semantic meaning
+#SEARCH: Find stories based on hybrid (semantic + keyword + weighting)
 #----------------------------------------------------
 #Searches for stories using a query. The query is converted to an embedding
 #and compared against the story embeddings in the database.
@@ -26,7 +26,7 @@ Content-Type: application/json
 
 
 {
-  "query": "dystopian life",
+  "query": "Ingrid Solheim",
   "limit": 10
 }
 
@@ -56,6 +56,6 @@ POST {{src_HostAddress}}/api/Search/metadata
 Content-Type: application/json
 
 {
-  "query": "",
+  "query": "smart home, designed to optimize a user's life",
   "limit": 5
 }

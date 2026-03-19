@@ -5,6 +5,9 @@ using Backend.Models;
 
 namespace Backend.Controllers;
 
+// Delegates all search logic to the service layer.
+// Keeps the controller focused on HTTP request/response handling.
+
 
 [ApiController] // marking this class as an api controller, which means it will handle HTTP requests and return JSON responses.
 
@@ -13,18 +16,13 @@ namespace Backend.Controllers;
 // this defines the SearchController class, which will handle all search related endpoints, such as POST /api/search
 public class SearchController : ControllerBase
 {
+    private readonly ISearchService _searchService;
     
-    private readonly IOllamaService _ollamaService;//Dependancy: service that communicats with the Ollama API to perform semantic search and get summaries. we will use it to convert the users search text into an embedding vector
-
-    private readonly IStoryRepository _storyRepository;//Dependancy: repository that gives access to the story data. We will use it to search stories using the embedding vectors we get from the OllamaService
-
-    //this is constructor, ASP.NET will automatically inject the dependencies (OllamaService and StoryRepository). this means we do not manually creaet these objects
-    public SearchController(IOllamaService ollamaService, IStoryRepository storyRepository)
+  
+    // Inject SearchService instead of multiple dependencies. This moves all search logic (semantic + keyword + ranking) into the service layer, keeping the controller simple and focused only on handling HTTP requests.
+    public SearchController(ISearchService searchService)
     {
-        //store the injected Ollama service in a private variable
-        _ollamaService = ollamaService;
-
-        _storyRepository = storyRepository;
+        _searchService = searchService;
     }
 
     //this attribute marks this method as an HTTP POST endpoint, the final route becomes: POST /api/search
@@ -37,8 +35,6 @@ public class SearchController : ControllerBase
                                             //fromBody tells ASP.NET to read JSON from the request body and convert it into a SearchRequestDTO object automaticcaly.
     public async Task<IActionResult> Search([FromBody] SearchRequestDTO request)
     {
-
-        Console.WriteLine("=== Search endpoint was hit ===");
         //checkif the query is empty or null, if it is return http 400 bad request with a message.
         if (request == null || string.IsNullOrWhiteSpace(request.Query))
         {
@@ -56,24 +52,10 @@ public class SearchController : ControllerBase
         }
 
         try
-        {   //convert the search text into an embedding vector using the Ollama service
-            var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
-
-            //search for stories in the repository that are similar to the embedding vector we got from the Ollama service
-            var storyResults = await _storyRepository.SearchAsync(embedding, request.Limit);
-
-         // // Map repository results to SearchResultDTO objects before returning them to the client
-            var results = storyResults.Select(result => new SearchResultDTO
-            {
-                Id = result.Story.Id,
-                Title = result.Story.Title,
-                Author = result.Story.Author,
-                Year = result.Story.Year,
-                Summary = result.Story.Summary,
-                // The similarity score (e.g., 0.95) is now provided by the repository.
-                Similarity = result.Similarity
-            }).ToList();
-
+        {
+            //******NEW******
+            //all search-related logic (semantic, keyword, and hybrid ranking) is encapsulated inside SearchService. The controller simply delegates the request, resulting in cleaner, more maintainable, and testable code.
+            var results = await _searchService.HybridSearchAsync(request);
             return Ok(results);
         }
         catch (Exception ex)
@@ -107,22 +89,7 @@ public class SearchController : ControllerBase
         
         try
         {
-            //calls repository method and sends keyword query to DB and returns a list of mathcing story objects
-            var stories = await _storyRepository.SearchByMetadataAsync(request.Query);
-
-            //here happens mapping to dto
-            var results = stories
-                .Take(request.Limit)//only return the number of results requested
-                .Select(Story => new SearchResultDTO//convert each story into dto
-                {
-                    Id = Story.Id,
-                    Title = Story.Title,
-                    Author = Story.Author,
-                    Year = Story.Year,
-                    Summary = Story.Summary,
-                    Similarity = 0
-                })
-                .ToList();//executes transformation and converts results to a list
+            var results = await _searchService.MetadataSearchAsync(request);
             return Ok(results);
         }
 
