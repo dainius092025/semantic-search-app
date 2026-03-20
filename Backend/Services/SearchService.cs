@@ -64,6 +64,7 @@ public class SearchService : ISearchService
                     Title = story.Title,
                     Author = story.Author,
                     Year = story.Year,
+                    Genre = story.Genre,
                     Summary = story.Summary,
                     Similarity = hasSemantic ? semanticMatch.Similarity : 0
                 };
@@ -110,6 +111,7 @@ public class SearchService : ISearchService
                 Title = story.Title,
                 Author = story.Author,
                 Year = story.Year,
+                Genre = story.Genre,
                 Summary = story.Summary,
 
             // Metadata search does not calculate similarity, so we set it to 0 

@@ -62,4 +62,9 @@ public class StoryRepository : IStoryRepository
 
         return results;
     }
+
+    public async Task<IEnumerable<Story>> GetAllAsync()
+    {
+        return await _context.Stories.ToListAsync();
+    }
 }

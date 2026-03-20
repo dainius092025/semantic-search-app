@@ -38,6 +38,33 @@ public class StoriesController : ControllerBase
         _storyRepository = storyRepository;
     }
 
+    // GET /api/stories
+    // Returns a list of all stories in the database.
+    [HttpGet]
+    public async Task<IActionResult> GetAllStories()
+    {
+        try
+        {
+            var stories = await _storyRepository.GetAllAsync();
+            var storyDtos = stories.Select(story => new StoryDetailDTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            });
+
+            return Ok(storyDtos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "An internal server error occurred.");
+        }
+    }
+
     // GET /api/stories/{id}
     // This endpoint returns a single story by id.
     [HttpGet("{id:int}")]
