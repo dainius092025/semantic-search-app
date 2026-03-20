@@ -37,6 +37,9 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID
         Task<Story?> GetByIdAsync(int id);
 
+        //gets one random story from the database, returns null if no stories exist it used by the randomstory endpoint
+        Task<Story?> GetRandomAsync();
+
         // Checks if a story already exists in the database. Returns true if it exists, false if it does not.
         // Used by the seeder to avoid saving duplicate stories.
         // Task<bool>   = returns true or false
