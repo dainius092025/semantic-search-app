@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { searchStories, SearchMode } from "../api/stories";
+import { searchStories } from "../api/stories";
 
 export function useSearch() {
   const [results, setResults] = useState([]);
@@ -7,11 +7,10 @@ export function useSearch() {
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [lastQuery, setLastQuery] = useState("");
-  const [mode, setMode] = useState(SearchMode.Semantic);
 
   // Centralized async search handler shared by page-level components.
   const search = useCallback(
-    async (query, searchMode = mode, limit = 20) => {
+    async (query, limit = 20) => {
       const trimmedQuery = query.trim();
       if (!trimmedQuery) return;
 
@@ -22,7 +21,6 @@ export function useSearch() {
       try {
         const data = await searchStories({
           query: trimmedQuery,
-          mode: searchMode,
           limit,
         });
         // Keep API order intact so "default" sorting reflects backend relevance.
@@ -35,7 +33,7 @@ export function useSearch() {
         setHasSearched(true);
       }
     },
-    [mode]
+    []
   );
 
   const reset = useCallback(() => {
@@ -54,7 +52,5 @@ export function useSearch() {
     lastQuery,
     search,
     reset,
-    mode,
-    setMode,
   };
 }

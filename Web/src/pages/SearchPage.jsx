@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 // Router hook to access navigation state.
 import { useLocation } from "react-router-dom";
-// Search input component with mode controls.
+// Search input component.
 import SearchBar from "../components/SearchBar";
 // Grid that renders search results and filtering UI.
 import ResultsGrid from "../components/ResultsGrid";
@@ -27,8 +27,6 @@ export default function SearchPage() {
     hasSearched,
     lastQuery,
     search,
-    mode,
-    setMode,
   } = useSearch();
 
   // Ref to the results container to support scroll-into-view.
@@ -46,8 +44,8 @@ export default function SearchPage() {
     if (location.state?.initialSearch) {
       // Reset the genre filter for a fresh search.
       setGenreFilter("all");
-      // Run the search using the current mode.
-      search(location.state.initialSearch, mode);
+      // Run the search.
+      search(location.state.initialSearch);
     }
     // Only re-run when the initial search value changes.
   }, [location.state?.initialSearch]);
@@ -88,11 +86,11 @@ export default function SearchPage() {
   }
 
   // Handler that runs a new search and resets filters.
-  function handleSearch(query, searchMode) {
+  function handleSearch(query) {
     // Clear any existing genre filter when searching.
     setGenreFilter("all");
-    // Execute the search with the provided mode.
-    search(query, searchMode);
+    // Execute the search.
+    search(query);
   }
 
   // Picks a random story either from results or from the full catalog.
@@ -128,12 +126,10 @@ export default function SearchPage() {
     <div className={styles.pageWithImage}>
       <div className={styles.contentArea}>
         <div className={styles.heroWrap}>
-          {/* SearchBar controls the query and search mode. */}
+          {/* SearchBar controls the query. */}
           <SearchBar
             onSearch={handleSearch}
             loading={loading}
-            mode={mode}
-            onModeChange={setMode}
           />
         </div>
 

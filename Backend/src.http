@@ -16,7 +16,7 @@ Content-Type: application/json
 
 ###
 #----------------------------------------------------
-#SEARCH: Find stories based on semantic meaning
+#SEARCH: Find stories based on hybrid (semantic + keyword + weighting)
 #----------------------------------------------------
 #Searches for stories using a query. The query is converted to an embedding
 #and compared against the story embeddings in the database.
@@ -28,9 +28,10 @@ Content-Type: application/json
 
 
 {
-  "query": "After thirty-two years of solitary duty, Henrik, the lighthouse keeper, finally relinquished his post as the automated systems replaced his vital role, returning to a quiet existence where he continued to watch over the sea with a familiar, automated light.",
+  "query": "Ingrid Solheim",
   "limit": 10
 }
+
 
 ###
 #----------------------------------------------------
@@ -44,4 +45,19 @@ GET {{src_HostAddress}}/api/Stories/1
 ###
 #Get another story by its ID
 #@name GetStoryById2
-GET {{src_HostAddress}}/api/Stories/8
+GET {{src_HostAddress}}/api/Stories/2
+
+###
+#----------------------------------------------------
+#KEYWORD SEARCH: Find stories by exact text match
+#----------------------------------------------------
+#Searches title, summary, and content using direct keyword matching.
+#Use this to test exact words or phrases instead of semantic meaning.
+#@name KeywordSearch
+POST {{src_HostAddress}}/api/Search/metadata
+Content-Type: application/json
+
+{
+  "query": "smart home, designed to optimize a user's life",
+  "limit": 5
+}
