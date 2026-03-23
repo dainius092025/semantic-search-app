@@ -30,7 +30,7 @@ function scoreInfo(score) {
   const pct = Math.round(score, 100);
   const bar = score <= 65 ? SCORE_BAR_COLOR_LOW : SCORE_BAR_COLOR_HIGH;
 
-  if (score >= 60) {
+  if (score >= 65) {
     return { label: "Strong match", bar, pct };
   }
 
