@@ -2,24 +2,7 @@ import { useEffect, useState } from "react";
 import { getStoryById } from "../api/stories";
 import styles from "./StoryModal.module.css";
 
-const GENRE_COLORS = {
-  "Literary Fiction":    { bg: "#f0f4ff", color: "#3730a3" },
-  "Science Fiction":     { bg: "#ecfdf5", color: "#065f46" },
-  "Mystery":             { bg: "#fdf4ff", color: "#7e22ce" },
-  "Fantasy":             { bg: "#fff7ed", color: "#c2410c" },
-  "Contemporary Drama":  { bg: "#fef9c3", color: "#854d0e" },
-  "Tech Thriller":       { bg: "#f0fdf4", color: "#166534" },
-  "Magical Realism":     { bg: "#fdf2f8", color: "#9d174d" },
-  "Historical Fiction":  { bg: "#fef3c7", color: "#92400e" },
-  "Post-Apocalyptic":    { bg: "#f1f5f9", color: "#334155" },
-  "Humor":               { bg: "#fef9c3", color: "#713f12" },
-};
-
-function getGenreStyle(genre) {
-  return GENRE_COLORS[genre] || { bg: "var(--parchment-dark)", color: "var(--text-muted)" };
-}
-
-export default function StoryModal({ story, onClose }) {
+export default function StoryModal({ story, onClose, onGenreClick }) {
   const [storyData, setStoryData] = useState(story);
   const [loading, setLoading] = useState(!story);
   const [error, setError] = useState(null);
@@ -66,8 +49,7 @@ export default function StoryModal({ story, onClose }) {
     );
   }
 
-  const { title, author, genre, publishedYear, summary, content, id } = storyData;
-  const genreStyle = getGenreStyle(genre);
+  const { title, author, genre, publishedYear, content } = storyData;
 
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
@@ -80,6 +62,24 @@ export default function StoryModal({ story, onClose }) {
         </button>
 
         <div className={styles.container}>
+          <header className={styles.header}>
+            <div className={styles.badges}>
+              {publishedYear && (
+                <span className={styles.yearBadge}>{publishedYear}</span>
+              )}
+            </div>
+            {title && <h2 className={styles.title}>{title}</h2>}
+            {author && <p className={styles.author}>by {author}</p>}
+            {genre && (
+              <button
+                type="button"
+                className={styles.genreBadge}
+                onClick={() => onGenreClick?.(genre)}
+              >
+                {genre}
+              </button>
+            )}
+          </header>
           <main className={styles.content}>
             {content ? (
               content.split("\n").map((para, i) =>

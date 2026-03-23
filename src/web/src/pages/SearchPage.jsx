@@ -12,9 +12,11 @@ export default function SearchPage() {
   const { results, loading, error, hasSearched, lastQuery, search, mode, setMode } = useSearch();
   const resultsRef = useRef(null);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [genreFilter, setGenreFilter] = useState("all");
 
   useEffect(() => {
     if (location.state?.initialSearch) {
+      setGenreFilter("all");
       search(location.state.initialSearch, mode);
     }
   }, [location.state?.initialSearch]);
@@ -25,25 +27,17 @@ export default function SearchPage() {
     }
   }, [hasSearched, loading]);
 
-  // Hotspots configuration (percent numbers relative to the side image)
-  const DEFAULT_HOTSPOTS = [
-    { id: "h1", left: 12, top: 58 },
-    { id: "h2", left: 36, top: 42 },
-    { id: "h3", left: 60, top: 70 },
-  ];
+  function handleSearch(query, searchMode) {
+    setGenreFilter("all");
+    search(query, searchMode);
+  }
 
-  // allow editing and persisting hotspots
-  const sideRef = useRef(null);
-  const [hotspots, setHotspots] = useState(() => {
-    try {
-      const raw = localStorage.getItem("hotspots_v1");
-      return raw ? JSON.parse(raw) : DEFAULT_HOTSPOTS;
-    } catch (e) {
-      return DEFAULT_HOTSPOTS;
-    }
-  });
-  const [isEditing, setIsEditing] = useState(false);
-  const dragging = useRef(null);
+  function handleGenreClick(genre) {
+    if (!genre) return;
+    setGenreFilter(genre);
+    search(genre, mode);
+    setSelectedStory(null);
+  }
 
   async function handleHotspotClick() {
     // Prefer current search results, otherwise fetch all stories
@@ -62,65 +56,12 @@ export default function SearchPage() {
     }
   }
 
-  function startDrag(e, id) {
-    if (!isEditing) return;
-    e.preventDefault();
-    dragging.current = { id };
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", endDrag);
-  }
-
-  function onPointerMove(e) {
-    if (!dragging.current) return;
-    const el = sideRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    // clamp
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    setHotspots((prev) => prev.map((h) => (h.id === dragging.current.id ? { ...h, left: Math.round(x * 100), top: Math.round(y * 100) } : h)));
-  }
-
-  function endDrag() {
-    dragging.current = null;
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", endDrag);
-  }
-
-  function saveHotspots() {
-    try {
-      localStorage.setItem("hotspots_v1", JSON.stringify(hotspots));
-      setIsEditing(false);
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  function resetHotspots() {
-    setHotspots(DEFAULT_HOTSPOTS);
-    localStorage.removeItem("hotspots_v1");
-  }
-  
-  function addHotspotAtEvent(e) {
-    if (!isEditing) return;
-    // only respond when clicking the side container itself, not a control
-    if (e.target !== sideRef.current) return;
-    const rect = sideRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-    const id = `h${Date.now().toString(36)}`;
-    setHotspots((p) => [...p, { id, left: Math.round(x * 100), top: Math.round(y * 100) }]);
-  }
-
-  function removeHotspot(id) {
-    setHotspots((p) => p.filter((h) => h.id !== id));
-  }
   return (
     <div className={styles.pageWithImage}>
       <div className={styles.contentArea}>
         <div className={styles.heroWrap}>
           <SearchBar
-            onSearch={search}
+            onSearch={handleSearch}
             loading={loading}
             mode={mode}
             onModeChange={setMode}
@@ -144,55 +85,41 @@ export default function SearchPage() {
 
       <div ref={resultsRef}>
         {!loading && hasSearched && (
-          <ResultsGrid results={results} query={lastQuery} onStoryClick={setSelectedStory} />
+          <ResultsGrid
+            results={results}
+            query={lastQuery}
+            onStoryClick={setSelectedStory}
+            genreFilter={genreFilter}
+            onGenreChange={setGenreFilter}
+          />
         )}
       </div>
 
       {selectedStory && (
-        <StoryModal story={selectedStory} onClose={() => setSelectedStory(null)} />
+        <StoryModal
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)}
+          onGenreClick={handleGenreClick}
+        />
       )}
       </div>
-      <div className={styles.sideImage} ref={sideRef} onPointerDown={addHotspotAtEvent}>
-        {!isEditing && (
-          <button className={styles.editToggle} onClick={() => setIsEditing(true)} aria-label="Edit hotspots">Edit</button>
-        )}
-        {hotspots.map((h) => (
-          <button
-            key={h.id}
-            className={`${styles.hotspot} ${isEditing ? styles.editing : ""}`}
-            style={{ left: `${h.left}%`, top: `${h.top}%` }}
-            onClick={handleHotspotClick}
-            onPointerDown={(e) => startDrag(e, h.id)}
-            aria-label={`Hotspot ${h.id}`}
-            title={isEditing ? `${h.left}%, ${h.top}%` : ""}
-          />
-        ))}
-
-        {isEditing && (
-          <div className={styles.hotspotEditor}>
-            <div className={styles.editorRow}>
-              <button onClick={() => setIsEditing(false)}>Done</button>
-              <button onClick={saveHotspots}>Save</button>
-              <button onClick={resetHotspots}>Reset</button>
-            </div>
-            <div className={styles.editorList}>
-              {hotspots.map((h) => (
-                <div key={h.id} className={styles.editorItem}>
-                  <strong>{h.id}</strong>
-                  <label>
-                    L:
-                    <input type="number" value={h.left} onChange={(e) => setHotspots((p) => p.map(x => x.id===h.id?{...x,left:Math.max(0,Math.min(100,Number(e.target.value)||0))}:x))} />
-                  </label>
-                  <label>
-                    T:
-                    <input type="number" value={h.top} onChange={(e) => setHotspots((p) => p.map(x => x.id===h.id?{...x,top:Math.max(0,Math.min(100,Number(e.target.value)||0))}:x))} />
-                  </label>
-                  <button className={styles.removeHotspot} onClick={() => removeHotspot(h.id)}>Remove</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <div className={styles.sideImage} aria-label="Bookshelf">
+        <span className={styles.cabinetCta}>
+          Tap the Bookshelf for a Surprise Tale!
+          <span className={styles.cabinetArrow} />
+        </span>
+        <button
+          type="button"
+          className={styles.bookshelfHotspot}
+          onClick={handleHotspotClick}
+          aria-label="Tap the Bookshelf for a Surprise Tale!"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleHotspotClick();
+            }
+          }}
+        />
       </div>
     </div>
   );

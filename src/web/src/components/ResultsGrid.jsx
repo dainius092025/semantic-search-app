@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import StoryCard from "./StoryCard";
 import styles from "./ResultsGrid.module.css";
 
-export default function ResultsGrid({ results, query, onStoryClick }) {
-  const [genreFilter, setGenreFilter] = useState("all");
+export default function ResultsGrid({ results, query, onStoryClick, genreFilter: genreFilterProp, onGenreChange }) {
+  const [genreFilterState, setGenreFilterState] = useState("all");
+  const genreFilter = genreFilterProp ?? genreFilterState;
+  const setGenreFilter = onGenreChange ?? setGenreFilterState;
   const [sortBy, setSortBy] = useState("default");
 
   // Build unique genre list from results

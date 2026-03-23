@@ -74,6 +74,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .center {
@@ -114,12 +115,41 @@
 }
 
 .genreBadge {
+  appearance: none;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   padding: 4px 12px;
   border-radius: 99px;
+  position: absolute;
+  top: 20px;
+  right: 72px;
+  background: var(--parchment-dark);
+  border: 1px solid var(--parchment-mid);
+  color: var(--text-muted);
+  z-index: 9;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.genreBadge:hover {
+  color: var(--ink);
+  background: #fff;
+  border-color: var(--parchment-dark);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.genreBadge:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
 }
 
 .yearBadge {
@@ -259,7 +289,10 @@
   color: var(--text-body);
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   padding-right: 8px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .content p {
@@ -280,13 +313,18 @@
   .modal {
     max-height: calc(100vh - 40px);
   }
-  
+
   .container {
     padding: 16px 12px;
   }
-  
+
   .closeBtn {
     top: 15px;
     right: 15px;
+  }
+
+  .genreBadge {
+    top: 15px;
+    right: 64px;
   }
 }
