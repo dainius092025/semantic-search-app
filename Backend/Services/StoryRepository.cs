@@ -62,4 +62,17 @@ public class StoryRepository : IStoryRepository
 
         return results;
     }
+
+    public async Task<IEnumerable<Story>> GetAllAsync()
+    {
+        return await _context.Stories.ToListAsync();
+    }
+
+    // Retrieves one random story from the database. We use Guid.NewGuid() to assign a random value to each story,then order by that value and take the first result.Returns null if the database is empty.
+    public async Task<Story?> GetRandomAsync()
+    {
+        return await _context.Stories
+            .OrderBy(s => Guid.NewGuid())
+            .FirstOrDefaultAsync();
+    }   
 }
