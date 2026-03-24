@@ -36,6 +36,9 @@ builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
 //this bit tells ASP.NET dependancy injection(when someone asks for ISearchServic, create and privide a SearcHService)
 builder.Services.AddScoped<ISearchService, SearchService>();
+// 2. REGISTER THE BACKGROUND SERVICE HERE
+// This tells .NET to start the IngestionBackgroundService automatically
+builder.Services.AddHostedService<IngestionBackgroundService>();
 
 var app = builder.Build();
 
@@ -57,7 +60,7 @@ using (var scope = app.Services.CreateScope())
         catch (Exception ex)
         {
             retryCount++;
-            Console.WriteLine($"Database not ready yet (Attempt {retryCount}/10). Retrying in 2 seconds...");
+            Console.WriteLine($"Database not ready: {ex.Message}. (Attempt {retryCount}/10). Retrying...");      
             if (retryCount >= 10)
             {
                 Console.WriteLine("Failed to connect to database after 10 attempts.");
