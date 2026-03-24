@@ -16,7 +16,7 @@
   position: relative;
 }
 
-.sideImage {
+/* .sideImage {
   position: sticky;
   top: 0;
   width: calc(110vh * 0.75);
@@ -33,7 +33,7 @@
   align-items: flex-start;
   justify-content: center;
   text-align: center;
-}
+} */
 
 .cabinetCta {
   margin-top: 10px;
@@ -88,11 +88,11 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 960px) {
+/* @media (max-width: 960px) {
   .sideImage {
     display: none;
   }
-}
+} */
 
 .compact {
   /* slightly tighter when results are showing */
