@@ -49,7 +49,7 @@ export default function StoryCard({ story, index, onClick }) {
   const { title, author, genre, publishedYear, summary, score } = story;
   const genreStyle = getGenreStyle(genre);
   const hasScore = typeof score === "number";
-  const adjustedScore = score + 20;
+  const adjustedScore = score * 100;
   const scoreMeta = hasScore ? scoreInfo(adjustedScore) : null;
 
   return (
