@@ -86,4 +86,24 @@ public class IngestionService : IStoryIngestionService
                 Console.ResetColor();
         }
     }
+
+    // Checks whether all stories in the database are fully ingested. We load all stories and check each one against the repository. If any story is missing embedding or summary data, we consider ingestion incomplete and return false. Returns true only when every story is fully ingested.
+    public async Task<bool> IsIngestionCompleteAsync()
+    {
+        // Get all stories from the database
+        var allStories = await _repository.GetAllAsync();
+
+        // Check each story for completeness
+        foreach (var story in allStories)
+        {
+            // If any story is not fully ingested, return false immediately
+            if (!await _repository.IsFullyIngestedAsync(story.Id))
+            {
+                return false;
+            }
+        }
+
+        // All stories are fully ingested
+        return true;
+    }
 }
