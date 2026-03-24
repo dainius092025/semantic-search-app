@@ -43,6 +43,15 @@ public class IngestionService : IStoryIngestionService
 
                 // Generate Embedding
                 var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+                
+                if (vector == null || vector.Length == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Embedding generation failed for story {story.Id}. Skipping.");
+                        Console.ResetColor();
+                        continue;
+                    }
+
                 story.Embedding = new Pgvector.Vector(vector);
 
                 // Generate Summary only if content is not empty
@@ -51,6 +60,15 @@ public class IngestionService : IStoryIngestionService
                 {
                     // Generate Summary
                     story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+                    
+                    if (string.IsNullOrWhiteSpace(story.Summary))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Summary generation failed for story {story.Id}. Skipping.");
+                        Console.ResetColor();
+                        continue;
+                    }
+                    
                 }
                 else
                 {

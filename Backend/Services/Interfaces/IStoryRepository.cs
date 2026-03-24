@@ -49,5 +49,8 @@ namespace Backend.Services.Interfaces
 
         // Returns all stories in the database.
         Task<IEnumerable<Story>> GetAllAsync();
+
+        // Returns one random story from the database
+        Task<Story?> GetRandomAsync();
     }
 }                     
