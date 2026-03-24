@@ -46,5 +46,11 @@ namespace Backend.Services.Interfaces
 
         //searches stories by keyword in metadata
         Task<List<Story>> SearchByMetadataAsync(string query);
+
+        // Returns all stories in the database.
+        Task<IEnumerable<Story>> GetAllAsync();
+
+        // Returns one random story from the database
+        Task<Story?> GetRandomAsync();
     }
 }                     

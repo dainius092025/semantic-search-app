@@ -38,6 +38,33 @@ public class StoriesController : ControllerBase
         _storyRepository = storyRepository;
     }
 
+    // GET /api/stories
+    // Returns a list of all stories in the database.
+    [HttpGet]
+    public async Task<IActionResult> GetAllStories()
+    {
+        try
+        {
+            var stories = await _storyRepository.GetAllAsync();
+            var storyDtos = stories.Select(story => new StoryDetailDTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            });
+
+            return Ok(storyDtos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "An internal server error occurred.");
+        }
+    }
+
     // GET /api/stories/{id}
     // This endpoint returns a single story by id.
     [HttpGet("{id:int}")]
@@ -72,6 +99,43 @@ public class StoriesController : ControllerBase
         {
             // In a real application, you would log the exception here.
             // Then return a generic error message to the client.
+            Console.WriteLine(ex);
+            return StatusCode(500, "An internal server error occurred. - the developer");
+        }
+    }
+
+    // GET /api/stories/random
+    // Returns one random story from the database.
+    [HttpGet("random")]
+    public async Task<IActionResult> GetRandomStory()
+    {
+        try
+        {
+            // Ask the repository for a random story.
+            var story = await _storyRepository.GetRandomAsync();
+
+            // If no stories exist in the database, return HTTP 404.
+            if (story == null)
+            {
+                return NotFound("No stories are available.");
+            }
+
+            // Map the Story entity to a DTO.
+            var storyDto = new StoryDetailDTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            };
+
+            // Return HTTP 200 OK with the random story.
+            return Ok(storyDto);
+        }
+        catch (Exception ex)
+        {
             Console.WriteLine(ex);
             return StatusCode(500, "An internal server error occurred. - the developer");
         }

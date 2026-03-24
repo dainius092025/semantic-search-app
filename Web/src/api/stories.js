@@ -1,67 +1,84 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5162";
 
-// SearchMode enum values from your API.
-export const SearchMode = {
-  Semantic: 0,
-};
-
+/**
+ * Shared fetch wrapper to keep status handling consistent across endpoints.
+ */
 async function fetchJson(url, options, errorPrefix) {
-  // Shared fetch wrapper keeps status handling consistent across endpoints.
   const res = await fetch(url, options);
 
   if (!res.ok) {
-    throw new Error(`${errorPrefix}: ${res.status} ${res.statusText}`);
+    let errorMsg = `${errorPrefix}: ${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.text();
+      if (errorData) errorMsg += ` - ${errorData}`;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMsg);
   }
 
   return res.json();
 }
 
 /**
- * POST /api/stories/search
- * Body: { query: string, mode: SearchMode (int), limit: number }
- * Returns: Story[]
- *   { id, title, author, genre, publishedYear, summary, content }
+ * POST /api/Search
+ * Body: { query: string, limit: number }
+ * Returns: SearchResultDTO[]
+ *   { id, title, author, year, summary, similarity }
  */
 export async function searchStories({
   query,
-  mode = SearchMode.Semantic,
   limit = 20,
 }) {
   const data = await fetchJson(
-    `${BASE_URL}/api/stories/search`,
+    `${BASE_URL}/api/Search`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, mode, limit }),
+      body: JSON.stringify({ query, limit }),
     },
     "Search failed"
   );
 
-  // Response shape: [{ story: { id, title, ... }, score: number }, ...]
-  // Flatten to: [{ id, title, ..., score }, ...]
-  return data.map(({ story, score }) => ({ ...story, score }));
+  // Response shape: [{ id, title, author, year, summary, similarity }, ...]
+  // Normalize fields to match what components expect (e.g., similarity -> score)
+  return data.map((item) => ({
+    ...item,
+    score: item.similarity,
+    publishedYear: item.year // components might expect publishedYear
+  }));
 }
 
 /**
- * GET /api/stories
- * Returns: Story[]
+ * GET /api/Stories
+ * Returns: StoryDetailDTO[]
  */
 export async function getAllStories() {
-  return fetchJson(
-    `${BASE_URL}/api/stories`,
+  const data = await fetchJson(
+    `${BASE_URL}/api/Stories`,
     { headers: { accept: "application/json" } },
     "Failed to load stories"
   );
+
+  return data.map(item => ({
+    ...item,
+    publishedYear: item.year
+  }));
 }
 
 /**
- * GET /api/stories/{id}
- * Returns: Story
+ * GET /api/Stories/{id}
+ * Returns: StoryDetailDTO
  */
 export async function getStoryById(id) {
-  return fetchJson(
-    `${BASE_URL}/api/stories/${id}`,
+  const data = await fetchJson(
+    `${BASE_URL}/api/Stories/${id}`,
     { headers: { accept: "application/json" } },
     "Story not found"
   );
+
+  return {
+    ...data,
+    publishedYear: data.year
+  };
 }

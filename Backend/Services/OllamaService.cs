@@ -27,7 +27,7 @@ public class OllamaService : IOllamaService
         var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
         _ollama = new OllamaApiClient(ollamaUrl);
 
-     _summaryModel = configuration["Ollama:SummaryModel"] ?? "llama3.2";
+     _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
     _ollama.SelectedModel = _summaryModel;
     }
 

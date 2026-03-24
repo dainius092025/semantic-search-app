@@ -9,12 +9,12 @@ const SUGGESTIONS = [
   "technology controlling people",
 ];
 
-export default function SearchBar({ onSearch, loading, mode }) {
+export default function SearchBar({ onSearch, loading }) {
   const [query, setQuery] = useState("");
 
   const handleSubmit = () => {
     if (query.trim() && !loading) {
-      onSearch(query.trim(), mode);
+      onSearch(query.trim());
     }
   };
 
@@ -26,7 +26,7 @@ export default function SearchBar({ onSearch, loading, mode }) {
 
   const handleSuggestion = (suggestion) => {
     setQuery(suggestion);
-    onSearch(suggestion, mode);
+    onSearch(suggestion);
   };
 
   return (
