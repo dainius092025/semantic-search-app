@@ -103,28 +103,23 @@ export default function SearchPage() {
         />
       )}
       </div>
-      <div className={styles.sideImage}>
+      <div className={styles.sideImage} aria-label="Bookshelf">
         <span className={styles.cabinetCta}>
           Tap the Bookshelf for a Surprise Tale!
           <span className={styles.cabinetArrow} />
         </span>
-        <a
-          className={styles.sideImageLink}
-          aria-label="Open a surprise tale"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            handleHotspotClick();
-          }}
+        <button
+          type="button"
+          className={styles.bookshelfHotspot}
+          onClick={handleHotspotClick}
+          aria-label="Tap the Bookshelf for a Surprise Tale!"
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               handleHotspotClick();
             }
           }}
-        >
-          <img className={styles.sideImageAsset} src="/bilde.png" alt="Bookshelf" />
-        </a>
+        />
       </div>
     </div>
   );
