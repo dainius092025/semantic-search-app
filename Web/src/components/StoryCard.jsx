@@ -27,18 +27,18 @@ function getGenreStyle(genre) {
 
 // Score is 100 float from the API (adjusted by +10 for display)
 function scoreInfo(score) {
-  const pct = Math.round(score, 100);
-  const bar = score <= 65 ? SCORE_BAR_COLOR_LOW : SCORE_BAR_COLOR_HIGH;
+  const pct = Math.round(score);
+  const bar = score >= 55 ? SCORE_BAR_COLOR_HIGH : SCORE_BAR_COLOR_LOW;
 
-  if (score >= 60) {
+  if (score >= 55) {
     return { label: "Strong match", bar, pct };
   }
 
-  if (score >= 45) {
+  if (score >= 35) {
     return { label: "Good match", bar, pct };
   }
 
-  if (score >= 30) {
+  if (score >= 20) {
     return { label: "Partial match", bar, pct };
   }
 
@@ -49,7 +49,7 @@ export default function StoryCard({ story, index, onClick }) {
   const { title, author, genre, publishedYear, summary, score } = story;
   const genreStyle = getGenreStyle(genre);
   const hasScore = typeof score === "number";
-  const adjustedScore = score + 20;
+  const adjustedScore = score *100 ;
   const scoreMeta = hasScore ? scoreInfo(adjustedScore) : null;
 
   return (

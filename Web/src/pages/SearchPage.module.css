@@ -63,47 +63,6 @@
   transform: rotate(45deg);
 }
 
-.toTop {
-  position: fixed;
-  right: calc(110vh * 0.75 + -20px);
-  bottom: 24px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--parchment-mid);
-  background: white;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  z-index: 20;
-}
-
-.toTopVisible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.toTop:hover {
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
-}
-
-.toTop:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 3px;
-}
-
 .bookshelfHotspot {
   position: absolute;
   left: calc(50% - 2px);
@@ -111,9 +70,10 @@
   width: calc(48% - 10px);
   height: 79%;
   transform: translate(-50%, -50%);
+  cursor: pointer;
   background: transparent;
   border: none;
-  cursor: pointer;
+  padding: 0;
 }
 
 .bookshelfHotspot:hover {
@@ -128,115 +88,9 @@
   outline-offset: 3px;
 }
 
-.hotspot {
-  position: absolute;
-
-  width: 96px;
-  height: 32px;
-  border-radius: 4px;
-
-  background: rgba(255, 255, 255, 0);
-  border: 1px solid rgba(0, 0, 0, 0);
-  box-shadow: none;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
-  outline: none;
-}
-
-.hotspot:hover {
-  transform: translate(-50%, -50%) scale(1.06);
-  box-shadow:
-    0 0 0 2px rgba(200, 134, 10, 0.45),
-    0 8px 18px rgba(0, 0, 0, 0.2);
-  background: rgba(200, 134, 10, 0.16);
-  border-color: rgba(200, 134, 10, 0.65);
-  outline: none;
-}
-
-.hotspot.editing {
-  /* editing mode is more visible */
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px dashed rgba(0, 0, 0, 0.18);
-}
-
-.hotspot:focus {
-  outline: none;
-  outline-offset: 2px;
-}
-
-.hotspotEditor {
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  min-width: 220px;
-  font-size: 13px;
-}
-
-.editToggle {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  /* fully transparent and no blur per user request */
-  background: transparent;
-  color: transparent;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  opacity: 0;
-  backdrop-filter: none;
-  box-shadow: none;
-}
-
-.removeHotspot {
-  margin-left: 8px;
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.editorRow {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.editorList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.editorItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.editorItem input {
-  width: 56px;
-  font-size: 12px;
-  padding: 4px;
-}
-
 @media (max-width: 960px) {
   .sideImage {
     display: none;
-  }
-
-  .toTop {
-    right: 24px;
   }
 }
 

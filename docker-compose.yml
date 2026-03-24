@@ -47,7 +47,7 @@ services:
       - postgres
       - ollama
     volumes:
-      - ./Docs:/src/Docs # Map Docs folder for StoryDataLoader
+      - ./Docs:/Docs # Map Docs folder for StoryDataLoader
 
   frontend:
     build:
