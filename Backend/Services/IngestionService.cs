@@ -32,11 +32,11 @@ public class IngestionService : IStoryIngestionService
         // 2. Process stories one by one
         foreach (var story in rawStories)
         {
-            // Check if story already exists to avoid duplicates
-            if (await _repository.ExistsAsync(story.Id))
+            // Check if story is already fully ingested to avoid duplicates. We check for full ingestion (embedding + summary) not just existence, because a story could exist in the database but still be missing generated data if Ollama failed previously
+            if (await _repository.IsFullyIngestedAsync(story.Id))
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Skipping story {story.Id} - already exists in database.");
+                Console.WriteLine($"Skipping story {story.Id} - already fully ingested.");
                 Console.ResetColor();
                 continue;
             }

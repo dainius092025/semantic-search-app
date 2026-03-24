@@ -46,6 +46,17 @@ public class StoryRepository : IStoryRepository
     public async Task<Story?> GetByIdAsync(int id) => await _context.Stories.FindAsync(id);
     public async Task<bool> ExistsAsync(int id) => await _context.Stories.AnyAsync(s => s.Id == id);
 
+    // Checks if a story is fully ingested by verifying that both the summary and embedding are present and valid. A story that exists but has an empty summary or empty embedding is not considered fully ingested.
+    // Returns true if complete, false if incomplete or not found.
+    public async Task<bool> IsFullyIngestedAsync(int id)
+    {
+        return await _context.Stories
+            .AnyAsync(s => s.Id == id &&
+                    s.Embedding != null &&
+                    s.Summary != null &&
+                    s.Summary != string.Empty);
+    }
+
     //searches only in metadata: title, author, year, genre,  using simple matching "contains"
     public async Task<List<Story>> SearchByMetadataAsync(string query)
     {

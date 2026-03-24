@@ -47,6 +47,10 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID to check
         Task<bool> ExistsAsync(int id);
 
+        // Checks if a story is fully ingested. A story is considered fully ingested when it has both a valid embedding and a non-empty summary.
+        // Returns true if complete, false if incomplete or not found.
+        Task<bool> IsFullyIngestedAsync(int id);
+
         //searches stories by keyword in metadata
         Task<List<Story>> SearchByMetadataAsync(string query);
 
