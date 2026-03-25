@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import styles from "./SearchBar.module.css";
 
 const SUGGESTIONS = [
@@ -33,7 +32,7 @@ export default function SearchBar({ onSearch, loading }) {
   return (
     <div className={styles.wrapper}>
       <p className={styles.eyebrow}>
-        <Link to="/">Story Discovery Engine</Link>
+        <a href="/">Story Discovery Engine</a>
       </p>
 
       <h1 className={styles.headline}>

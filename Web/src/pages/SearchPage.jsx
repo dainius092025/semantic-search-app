@@ -13,6 +13,7 @@ export default function SearchPage() {
   const resultsRef = useRef(null);
   const [selectedStory, setSelectedStory] = useState(null);
   const [genreFilter, setGenreFilter] = useState("all");
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     if (location.state?.initialSearch) {
@@ -26,6 +27,19 @@ export default function SearchPage() {
       resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [hasSearched, loading]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 320);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   function handleSearch(query) {
     setGenreFilter("all");
@@ -51,6 +65,10 @@ export default function SearchPage() {
       const rand = pool[Math.floor(Math.random() * pool.length)];
       setSelectedStory(rand);
     } catch (err) {}
+  }
+
+  function handleScrollTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -121,6 +139,16 @@ export default function SearchPage() {
           <img className={styles.sideImageAsset} src="/bilde.png" alt="Bookshelf" />
         </a>
       </div>
+      {showScrollTop && (
+        <button
+          type="button"
+          className={styles.scrollTopButton}
+          onClick={handleScrollTop}
+          aria-label="Back to top"
+        >
+          Top
+        </button>
+      )}
     </div>
   );
 }

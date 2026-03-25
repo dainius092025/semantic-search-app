@@ -152,6 +152,36 @@
   animation-delay: 0.3s;
 }
 
+.scrollTopButton {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: var(--midnight-espresso);
+  color: var(--vanilla-cream);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-md);
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.scrollTopButton:hover {
+  background: var(--honey-gold);
+  transform: translateY(-2px);
+}
+
+.scrollTopButton:focus-visible {
+  outline: 2px solid var(--honey-gold);
+  outline-offset: 3px;
+}
+
 @keyframes bounce {
   0%,
   80%,
@@ -162,6 +192,13 @@
   40% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .scrollTopButton {
+    right: 16px;
+    bottom: 16px;
   }
 }
 
