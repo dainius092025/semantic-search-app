@@ -54,8 +54,7 @@ export default function SearchBar({ onSearch, loading, darkStoryTheme, onToggleS
       </h1>
 
       <p className={styles.sub}>
-        Describe a theme, emotion, or situation - the engine finds the most
-        relevant stories from the collection.
+       Describe a feeling, theme, or situation and we’ll match you with stories.
       </p>
 
       <div className={styles.inputRow}>
@@ -82,8 +81,9 @@ export default function SearchBar({ onSearch, loading, darkStoryTheme, onToggleS
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type Here..."
+            placeholder="heartbreak, war, childhood memories, love"
             autoFocus
+            
           />
 
           {query && (
@@ -104,7 +104,7 @@ export default function SearchBar({ onSearch, loading, darkStoryTheme, onToggleS
           onClick={handleSubmit}
           disabled={!query.trim() || loading}
         >
-          {loading ? <span className={styles.spinner} /> : "Discover"}
+          {loading ? <span className={styles.spinner} /> : "FIND STORIES"}
         </button>
       </div>
 

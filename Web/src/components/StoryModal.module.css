@@ -103,7 +103,9 @@
 }
 
 .header {
-  margin-bottom: 0;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--weathered-sand);
 }
 
 .badges {
@@ -350,6 +352,10 @@
 .modalDark .content,
 .modalDark .idBadge {
   color: #d5c7b2;
+}
+
+.modalDark .header {
+  border-bottom-color: #43372f;
 }
 
 .modalDark .scoreBox,

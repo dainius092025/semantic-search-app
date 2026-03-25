@@ -123,7 +123,7 @@ export default function SearchPage() {
       </div>
       <div className={styles.sideImage}>
         <span className={styles.cabinetCta}>
-          Tap the Bookshelf for a Surprise Tale!
+         Feeling curious? Tap here.
           <span className={styles.cabinetArrow} />
         </span>
         <a
