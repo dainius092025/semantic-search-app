@@ -14,3 +14,4 @@ describe("App", () => {
     expect(screen.getByText(/story discovery engine/i)).toBeInTheDocument();
   });
 });
+

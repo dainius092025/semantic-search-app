@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--parchment);
-  border-bottom: 1px solid var(--parchment-mid);
+  background: var(--vanilla-cream);
+  border-bottom: 1px solid var(--weathered-sand);
   backdrop-filter: blur(8px);
 }
 
@@ -26,7 +26,7 @@
 
 .brandMark {
   font-size: 22px;
-  color: var(--amber);
+  color: var(--honey-gold);
   line-height: 1;
 }
 
@@ -34,7 +34,7 @@
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--midnight-espresso);
   letter-spacing: 0.01em;
 }
 
@@ -53,14 +53,14 @@
 }
 
 .navLink:hover {
-  color: var(--amber);
+  color: var(--honey-gold);
 }
 .searchBar {
   display: flex;
   align-items: center;
   gap: 8px;
   background: white;
-  border: 1px solid var(--parchment-mid);
+  border: 1px solid var(--weathered-sand);
   border-radius: var(--radius-md);
   padding: 6px 12px;
   box-shadow: var(--shadow-sm);
@@ -85,7 +85,7 @@
   font-size: 12px;
   font-weight: 600;
   color: white;
-  background: var(--amber);
+  background: var(--honey-gold);
   border: none;
   border-radius: 4px;
   padding: 6px 14px;

@@ -12,7 +12,7 @@
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--parchment-mid);
+  border-bottom: 1px solid var(--weathered-sand);
 }
 
 .count {
@@ -22,13 +22,13 @@
 }
 
 .count strong {
-  color: var(--ink);
+  color: var(--midnight-espresso);
   font-weight: 600;
 }
 
 .count em {
   font-style: italic;
-  color: var(--amber);
+  color: var(--honey-gold);
 }
 
 .controls {
@@ -42,7 +42,7 @@
   font-size: 13px;
   color: var(--text-body);
   background: #fff;
-  border: 1px solid var(--parchment-mid);
+  border: 1px solid var(--weathered-sand);
   border-radius: var(--radius);
   padding: 7px 14px;
   cursor: pointer;
@@ -52,7 +52,7 @@
 }
 
 .select:focus {
-  border-color: var(--amber);
+  border-color: var(--honey-gold);
 }
 
 .grid {
@@ -70,14 +70,14 @@
 .emptyIcon {
   display: block;
   font-size: 48px;
-  color: var(--parchment-mid);
+  color: var(--weathered-sand);
   margin-bottom: 16px;
 }
 
 .empty h3 {
   font-family: var(--font-display);
   font-size: 22px;
-  color: var(--ink-soft);
+  color: var(--walnut-bark);
   margin-bottom: 8px;
 }
 
@@ -98,3 +98,4 @@
     grid-template-columns: 1fr;
   }
 }
+

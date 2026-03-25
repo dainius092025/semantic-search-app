@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./SearchBar.module.css";
 
 const SUGGESTIONS = [
@@ -32,7 +33,7 @@ export default function SearchBar({ onSearch, loading }) {
   return (
     <div className={styles.wrapper}>
       <p className={styles.eyebrow}>
-        <a href="/">Story Discovery Engine</a>
+        <Link to="/">Story Discovery Engine</Link>
       </p>
 
       <h1 className={styles.headline}>
@@ -42,7 +43,7 @@ export default function SearchBar({ onSearch, loading }) {
       </h1>
 
       <p className={styles.sub}>
-        Describe a theme, emotion, or situation — the engine finds the most
+        Describe a theme, emotion, or situation - the engine finds the most
         relevant stories from the collection.
       </p>
 
@@ -70,22 +71,24 @@ export default function SearchBar({ onSearch, loading }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type Here…"
+            placeholder="Type Here..."
             autoFocus
           />
 
           {query && (
             <button
+              type="button"
               className={styles.clearBtn}
               onClick={() => setQuery("")}
               aria-label="Clear"
             >
-              ✕
+              x
             </button>
           )}
         </div>
 
         <button
+          type="button"
           className={styles.searchBtn}
           onClick={handleSubmit}
           disabled={!query.trim() || loading}
@@ -99,6 +102,7 @@ export default function SearchBar({ onSearch, loading }) {
         {SUGGESTIONS.map((suggestion) => (
           <button
             key={suggestion}
+            type="button"
             className={styles.tag}
             onClick={() => handleSuggestion(suggestion)}
           >
@@ -109,3 +113,4 @@ export default function SearchBar({ onSearch, loading }) {
     </div>
   );
 }
+

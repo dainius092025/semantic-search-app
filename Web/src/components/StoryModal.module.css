@@ -15,7 +15,7 @@
 
 .modal {
   position: relative;
-  background: var(--parchment);
+  background: var(--vanilla-cream);
   border-radius: var(--radius-lg);
   max-width: 760px;
   width: 100%;
@@ -56,7 +56,7 @@
   align-items: center;
   justify-content: center;
   background: white;
-  border: 1px solid var(--parchment-mid);
+  border: 1px solid var(--weathered-sand);
   border-radius: 50%;
   cursor: pointer;
   color: var(--text-muted);
@@ -65,8 +65,8 @@
 }
 
 .closeBtn:hover {
-  background: var(--parchment-dark);
-  color: var(--ink);
+  background: var(--oatmilk);
+  color: var(--midnight-espresso);
 }
 
 .container {
@@ -90,8 +90,8 @@
 .spinner {
   width: 28px;
   height: 28px;
-  border: 2px solid var(--parchment-mid);
-  border-top-color: var(--amber);
+  border: 2px solid var(--weathered-sand);
+  border-top-color: var(--honey-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -126,8 +126,8 @@
   position: absolute;
   top: 20px;
   right: 72px;
-  background: var(--parchment-dark);
-  border: 1px solid var(--parchment-mid);
+  background: var(--oatmilk);
+  border: 1px solid var(--weathered-sand);
   color: var(--text-muted);
   z-index: 9;
   cursor: pointer;
@@ -140,23 +140,23 @@
 }
 
 .genreBadge:hover {
-  color: var(--ink);
+  color: var(--midnight-espresso);
   background: #fff;
-  border-color: var(--parchment-dark);
+  border-color: var(--oatmilk);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
 
 .genreBadge:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--honey-gold);
   outline-offset: 2px;
 }
 
 .yearBadge {
   font-size: 12px;
   color: var(--text-muted);
-  background: var(--parchment-dark);
-  border: 1px solid var(--parchment-mid);
+  background: var(--oatmilk);
+  border: 1px solid var(--weathered-sand);
   padding: 3px 12px;
   border-radius: 99px;
 }
@@ -171,7 +171,7 @@
   font-family: var(--font-display);
   font-size: clamp(24px, 4vw, 36px);
   font-weight: 900;
-  color: var(--ink);
+  color: var(--midnight-espresso);
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 6px;
@@ -190,8 +190,8 @@
   align-items: flex-start;
   gap: 20px;
   background: #fff;
-  border: 1px solid var(--parchment-mid);
-  border-left: 3px solid var(--amber);
+  border: 1px solid var(--weathered-sand);
+  border-left: 3px solid var(--honey-gold);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   padding: 16px 20px;
   box-shadow: var(--shadow-sm);
@@ -216,7 +216,7 @@
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 900;
-  color: var(--amber);
+  color: var(--honey-gold);
   line-height: 1;
 }
 
@@ -230,14 +230,14 @@
 
 .scoreTrack {
   height: 6px;
-  background: var(--parchment-dark);
+  background: var(--oatmilk);
   border-radius: 99px;
   overflow: hidden;
 }
 
 .scoreFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--amber-light), var(--amber));
+  background: linear-gradient(90deg, var(--apricot-glow), var(--honey-gold));
   border-radius: 99px;
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -250,7 +250,7 @@
 
 .summaryBox {
   background: #fff;
-  border-left: 3px solid var(--amber);
+  border-left: 3px solid var(--honey-gold);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   padding: 16px 20px;
   margin-top: 12px;
@@ -262,7 +262,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--honey-gold);
   margin-bottom: 6px;
 }
 
@@ -275,7 +275,7 @@
 
 .divider {
   text-align: center;
-  color: var(--amber);
+  color: var(--honey-gold);
   font-size: 20px;
   margin: 20px 0;
   opacity: 0.4;
@@ -306,7 +306,7 @@
 
 .notFoundIcon {
   font-size: 48px;
-  color: var(--parchment-mid);
+  color: var(--weathered-sand);
 }
 
 @media (max-width: 600px) {

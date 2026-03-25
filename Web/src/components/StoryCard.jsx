@@ -1,4 +1,5 @@
 import styles from "./StoryCard.module.css";
+import { normalizeScore, scoreLabel } from "../utils/score";
 
 const SCORE_BAR_COLOR_HIGH = "#22c55e";
 const SCORE_BAR_COLOR_LOW = "#c8860a";
@@ -19,44 +20,39 @@ const GENRE_COLORS = {
 function getGenreStyle(genre) {
   return (
     GENRE_COLORS[genre] || {
-      bg: "var(--parchment-dark)",
+      bg: "var(--oatmilk)",
       color: "var(--text-muted)",
     }
   );
 }
 
-// Score is 100 float from the API (adjusted by +10 for display)
 function scoreInfo(score) {
-  const pct = Math.round(score);
+  const pct = Math.max(0, Math.min(Math.round(score), 100));
   const bar = score >= 55 ? SCORE_BAR_COLOR_HIGH : SCORE_BAR_COLOR_LOW;
-
-  if (score >= 55) {
-    return { label: "Strong match", bar, pct };
-  }
-
-  if (score >= 35) {
-    return { label: "Good match", bar, pct };
-  }
-
-  if (score >= 20) {
-    return { label: "Partial match", bar, pct };
-  }
-
-  return { label: "Weak match", bar, pct };
+  return { label: scoreLabel(score), bar, pct };
 }
 
 export default function StoryCard({ story, index, onClick }) {
   const { title, author, genre, publishedYear, summary, score } = story;
   const genreStyle = getGenreStyle(genre);
-  const hasScore = typeof score === "number";
-  const adjustedScore = score *100 ;
+  const adjustedScore = normalizeScore(score);
+  const hasScore = typeof adjustedScore === "number";
   const scoreMeta = hasScore ? scoreInfo(adjustedScore) : null;
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
 
   return (
     <article
       className={styles.card}
       style={{ animationDelay: `${index * 55}ms` }}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
     >
       <div className={styles.top}>
         <span
@@ -112,3 +108,4 @@ export default function StoryCard({ story, index, onClick }) {
     </article>
   );
 }
+
