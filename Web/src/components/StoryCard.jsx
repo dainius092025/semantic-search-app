@@ -32,7 +32,7 @@ function scoreInfo(score) {
   return { label: scoreLabel(score), bar, pct };
 }
 
-export default function StoryCard({ story, index, onClick }) {
+export default function StoryCard({ story, index, onClick, dark = false }) {
   const { title, author, genre, publishedYear, summary, score } = story;
   const genreStyle = getGenreStyle(genre);
   const adjustedScore = normalizeScore(score);
@@ -47,7 +47,7 @@ export default function StoryCard({ story, index, onClick }) {
 
   return (
     <article
-      className={styles.card}
+      className={`${styles.card} ${dark ? styles.cardDark : ""}`}
       style={{ animationDelay: `${index * 55}ms` }}
       onClick={onClick}
       onKeyDown={handleKeyDown}

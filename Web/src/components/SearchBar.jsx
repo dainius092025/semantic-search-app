@@ -9,7 +9,7 @@ const SUGGESTIONS = [
   "technology controlling people",
 ];
 
-export default function SearchBar({ onSearch, loading }) {
+export default function SearchBar({ onSearch, loading, darkStoryTheme, onToggleStoryTheme }) {
   const [query, setQuery] = useState("");
 
   const handleSubmit = () => {
@@ -31,6 +31,18 @@ export default function SearchBar({ onSearch, loading }) {
 
   return (
     <div className={styles.wrapper}>
+      <button
+        type="button"
+        className={`${styles.themeToggle} ${darkStoryTheme ? styles.themeToggleActive : ""}`}
+        onClick={onToggleStoryTheme}
+        aria-pressed={darkStoryTheme}
+        aria-label={darkStoryTheme ? "Switch to day story theme" : "Switch to night story theme"}
+      >
+        <span className={styles.themeIcon} aria-hidden="true">
+          {darkStoryTheme ? "☾" : "☀"}
+        </span>
+      </button>
+
       <p className={styles.eyebrow}>
         <a href="/">Story Discovery Engine</a>
       </p>
@@ -109,6 +121,7 @@ export default function SearchBar({ onSearch, loading }) {
           </button>
         ))}
       </div>
+
     </div>
   );
 }

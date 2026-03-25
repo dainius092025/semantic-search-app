@@ -1,4 +1,5 @@
 .wrapper {
+  position: relative;
   text-align: center;
   padding: 72px 24px 52px;
   max-width: 740px;
@@ -207,5 +208,57 @@
 }
 .modeActive .modeLabel {
   color: var(--honey-gold);
+}
+
+.themeToggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--weathered-sand);
+  background: #fff;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.themeToggle:hover {
+  border-color: var(--apricot-glow);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.themeToggleActive {
+  background: var(--midnight-espresso);
+  color: var(--vanilla-cream);
+  border-color: var(--midnight-espresso);
+}
+
+.themeIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .themeToggle {
+    top: 6px;
+    left: 6px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .themeIcon {
+    font-size: 16px;
+  }
 }
 

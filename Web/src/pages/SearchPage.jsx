@@ -14,6 +14,7 @@ export default function SearchPage() {
   const [selectedStory, setSelectedStory] = useState(null);
   const [genreFilter, setGenreFilter] = useState("all");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [darkStoryTheme, setDarkStoryTheme] = useState(false);
 
   useEffect(() => {
     if (location.state?.initialSearch) {
@@ -78,6 +79,8 @@ export default function SearchPage() {
           <SearchBar
             onSearch={handleSearch}
             loading={loading}
+            darkStoryTheme={darkStoryTheme}
+            onToggleStoryTheme={() => setDarkStoryTheme((value) => !value)}
           />
         </div>
 
@@ -104,6 +107,7 @@ export default function SearchPage() {
             onStoryClick={setSelectedStory}
             genreFilter={genreFilter}
             onGenreChange={setGenreFilter}
+            darkStoryTheme={darkStoryTheme}
           />
         )}
       </div>
@@ -113,6 +117,7 @@ export default function SearchPage() {
           story={selectedStory}
           onClose={() => setSelectedStory(null)}
           onGenreClick={handleGenreClick}
+          darkStoryTheme={darkStoryTheme}
         />
       )}
       </div>

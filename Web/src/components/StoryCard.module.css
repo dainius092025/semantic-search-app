@@ -137,3 +137,39 @@
   color: var(--text-faint);
   font-family: monospace;
 }
+
+.cardDark {
+  background: #1e1915;
+  border-color: #43372f;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.cardDark:hover {
+  border-color: var(--honey-gold);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+}
+
+.cardDark .title {
+  color: var(--vanilla-cream);
+}
+
+.cardDark .author,
+.cardDark .excerpt,
+.cardDark .year,
+.cardDark .scoreLabel,
+.cardDark .storyId {
+  color: #c8bda8;
+}
+
+.cardDark .scoreTrack {
+  background: #2b241f;
+  border-color: #43372f;
+}
+
+.cardDark .footer {
+  border-top-color: #43372f;
+}
+
+.cardDark .readMore {
+  color: #f2c14d;
+}

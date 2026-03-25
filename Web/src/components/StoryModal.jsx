@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getStoryById } from "../api/stories";
 import styles from "./StoryModal.module.css";
 
-export default function StoryModal({ story, onClose, onGenreClick }) {
+export default function StoryModal({ story, onClose, onGenreClick, darkStoryTheme = false }) {
   const [storyData, setStoryData] = useState(story);
   const [loading, setLoading] = useState(!story?.content);
   const [error, setError] = useState(null);
@@ -57,7 +57,10 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
   if (loading) {
     return (
       <div className={styles.backdrop} onClick={handleBackdropClick}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.center}>
             <div className={styles.spinner} />
             <p>Loading story...</p>
@@ -70,7 +73,10 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
   if (error || !storyData) {
     return (
       <div className={styles.backdrop} onClick={handleBackdropClick}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.center}>
             <span className={styles.notFoundIcon}></span>
             <h2>Story not found</h2>
@@ -85,7 +91,10 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
 
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button type="button" className={styles.closeBtn} onClick={onClose}>
           <svg
             width="20"

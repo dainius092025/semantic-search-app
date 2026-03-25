@@ -8,6 +8,7 @@ export default function ResultsGrid({
   onStoryClick,
   genreFilter: genreFilterProp,
   onGenreChange,
+  darkStoryTheme,
 }) {
   const [genreFilterState, setGenreFilterState] = useState("all");
   const genreFilter = genreFilterProp ?? genreFilterState;
@@ -104,6 +105,7 @@ export default function ResultsGrid({
               story={story}
               index={i}
               onClick={() => onStoryClick(story)}
+              dark={darkStoryTheme}
             />
           ))}
         </div>
