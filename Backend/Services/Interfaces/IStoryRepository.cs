@@ -37,6 +37,9 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID
         Task<Story?> GetByIdAsync(int id);
 
+        //gets one random story from the database, returns null if no stories exist it used by the randomstory endpoint
+        Task<Story?> GetRandomAsync();
+
         // Checks if a story already exists in the database. Returns true if it exists, false if it does not.
         // Used by the seeder to avoid saving duplicate stories.
         // Task<bool>   = returns true or false
@@ -44,10 +47,15 @@ namespace Backend.Services.Interfaces
         // int id       = accepts the story ID to check
         Task<bool> ExistsAsync(int id);
 
+        // Checks if a story is fully ingested. A story is considered fully ingested when it has both a valid embedding and a non-empty summary.
+        // Returns true if complete, false if incomplete or not found.
+        Task<bool> IsFullyIngestedAsync(int id);
+
         //searches stories by keyword in metadata
         Task<List<Story>> SearchByMetadataAsync(string query);
 
         // Returns all stories in the database.
         Task<IEnumerable<Story>> GetAllAsync();
+
     }
 }                     

@@ -103,4 +103,41 @@ public class StoriesController : ControllerBase
             return StatusCode(500, "An internal server error occurred. - the developer");
         }
     }
+
+    // GET /api/stories/random
+    // Returns one random story from the database.
+    [HttpGet("random")]
+    public async Task<IActionResult> GetRandomStory()
+    {
+        try
+        {
+            // Ask the repository for a random story.
+            var story = await _storyRepository.GetRandomAsync();
+
+            // If no stories exist in the database, return HTTP 404.
+            if (story == null)
+            {
+                return NotFound("No stories are available.");
+            }
+
+            // Map the Story entity to a DTO.
+            var storyDto = new StoryDetailDTO
+            {
+                Id = story.Id,
+                Title = story.Title,
+                Author = story.Author,
+                Year = story.Year,
+                Genre = story.Genre,
+                Content = story.Content
+            };
+
+            // Return HTTP 200 OK with the random story.
+            return Ok(storyDto);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "An internal server error occurred. - the developer");
+        }
+    }
 }

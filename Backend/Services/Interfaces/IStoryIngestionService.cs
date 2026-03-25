@@ -10,7 +10,12 @@ public interface IStoryIngestionService
 {
 
     Task RunFullIngestionAsync(); // This method will run the entire ingestion process, from loading raw story data to generating embeddings and summaries, and finally saving everything to the database. It is designed to be called once to populate the system with stories, and can be scheduled to run periodically if needed.
+
+    // Checks whether all stories in the database are fully ingested. Returns true if all stories have valid embeddings and summaries.Returns false if any stories are missing generated data.
+    Task<bool> IsIngestionCompleteAsync();
+
 }
+
 
 
 

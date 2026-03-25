@@ -32,17 +32,26 @@ public class IngestionService : IStoryIngestionService
         // 2. Process stories one by one
         foreach (var story in rawStories)
         {
-            // Check if story already exists to avoid duplicates
-            if (await _repository.ExistsAsync(story.Id))
+            // Check if story is already fully ingested to avoid duplicates. We check for full ingestion (embedding + summary) not just existence, because a story could exist in the database but still be missing generated data if Ollama failed previously
+            if (await _repository.IsFullyIngestedAsync(story.Id))
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Skipping story {story.Id} - already exists in database.");
+                Console.WriteLine($"Skipping story {story.Id} - already fully ingested.");
                 Console.ResetColor();
                 continue;
             }
 
                 // Generate Embedding
                 var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+                
+                if (vector == null || vector.Length == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Embedding generation failed for story {story.Id}. Skipping.");
+                        Console.ResetColor();
+                        continue;
+                    }
+
                 story.Embedding = new Pgvector.Vector(vector);
 
                 // Generate Summary only if content is not empty
@@ -51,6 +60,15 @@ public class IngestionService : IStoryIngestionService
                 {
                     // Generate Summary
                     story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+                    
+                    if (string.IsNullOrWhiteSpace(story.Summary))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Summary generation failed for story {story.Id}. Skipping.");
+                        Console.ResetColor();
+                        continue;
+                    }
+                    
                 }
                 else
                 {
@@ -67,5 +85,25 @@ public class IngestionService : IStoryIngestionService
                 Console.WriteLine($"Ingested story {story.Id} successfully.");
                 Console.ResetColor();
         }
+    }
+
+    // Checks whether all stories in the database are fully ingested. We load all stories and check each one against the repository. If any story is missing embedding or summary data, we consider ingestion incomplete and return false. Returns true only when every story is fully ingested.
+    public async Task<bool> IsIngestionCompleteAsync()
+    {
+        // Get all stories from the database
+        var allStories = await _repository.GetAllAsync();
+
+        // Check each story for completeness
+        foreach (var story in allStories)
+        {
+            // If any story is not fully ingested, return false immediately
+            if (!await _repository.IsFullyIngestedAsync(story.Id))
+            {
+                return false;
+            }
+        }
+
+        // All stories are fully ingested
+        return true;
     }
 }
