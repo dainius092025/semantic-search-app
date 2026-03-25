@@ -17,6 +17,7 @@ public class OllamaService : IOllamaService
     private readonly OllamaApiClient _ollama;
 
     private readonly string _summaryModel;
+    private readonly string _embeddingModel;
 
     // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
     public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
@@ -28,6 +29,8 @@ public class OllamaService : IOllamaService
         _ollama = new OllamaApiClient(ollamaUrl);
 
      _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
+     _embeddingModel = configuration["Ollama:EmbeddingModel"] ?? "nomic-embed-text";
+
     _ollama.SelectedModel = _summaryModel;
     }
 
@@ -81,7 +84,7 @@ public class OllamaService : IOllamaService
         var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
             {
                 //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
-                Model = "nomic-embed-text",
+                Model = _embeddingModel,
 
                 //the text we want to  convertto vector
                 Input = new List<string> { text }
