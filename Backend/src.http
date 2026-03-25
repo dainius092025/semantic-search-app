@@ -28,7 +28,7 @@ Content-Type: application/json
 
 
 {
-  "query": "Ingrid Solheim",
+  "query": " love ",
   "limit": 10
 }
 
