@@ -30,7 +30,7 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.center}>
             <div className={styles.spinner} />
-            <p>Loading storyâ€¦</p>
+            <p>Loading story</p>
           </div>
         </div>
       </div>
