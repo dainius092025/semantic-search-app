@@ -1,4 +1,5 @@
 .wrapper {
+  position: relative;
   text-align: center;
   padding: 72px 24px 52px;
   max-width: 740px;
@@ -9,7 +10,7 @@
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--honey-gold);
   margin-bottom: 20px;
 }
 .headline {
@@ -17,13 +18,13 @@
   font-size: clamp(38px, 6vw, 60px);
   font-weight: 900;
   line-height: 1.1;
-  color: var(--ink);
+  color: var(--midnight-espresso);
   margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 .headline em {
   font-style: italic;
-  color: var(--amber);
+  color: var(--honey-gold);
 }
 .sub {
   font-size: 16px;
@@ -57,7 +58,7 @@
   width: 100%;
   padding: 15px 44px 15px 48px;
   background: #fff;
-  border: 1.5px solid var(--parchment-mid);
+  border: 1.5px solid var(--weathered-sand);
   border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: 300;
@@ -72,7 +73,7 @@
   color: var(--text-faint);
 }
 .input:focus {
-  border-color: var(--amber);
+  border-color: var(--honey-gold);
   box-shadow:
     0 0 0 3px rgba(200, 134, 10, 0.12),
     var(--shadow-sm);
@@ -92,8 +93,8 @@
 }
 .searchBtn {
   padding: 15px 28px;
-  background: var(--ink);
-  color: var(--parchment);
+  background: var(--midnight-espresso);
+  color: var(--vanilla-cream);
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
@@ -111,7 +112,7 @@
   justify-content: center;
 }
 .searchBtn:hover:not(:disabled) {
-  background: var(--amber);
+  background: var(--honey-gold);
   box-shadow: var(--shadow-md);
 }
 .searchBtn:active:not(:disabled) {
@@ -125,7 +126,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid rgba(245, 239, 227, 0.3);
-  border-top-color: var(--parchment);
+  border-top-color: var(--vanilla-cream);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
@@ -150,17 +151,17 @@
   font-size: 12px;
   font-weight: 400;
   color: var(--text-muted);
-  background: var(--parchment-dark);
-  border: 1px solid var(--parchment-mid);
+  background: var(--oatmilk);
+  border: 1px solid var(--weathered-sand);
   border-radius: 99px;
   padding: 5px 14px;
   cursor: pointer;
   transition: all 0.15s;
 }
 .tag:hover {
-  background: var(--amber-pale);
-  border-color: var(--amber-light);
-  color: var(--ink);
+  background: var(--butter-veil);
+  border-color: var(--apricot-glow);
+  color: var(--midnight-espresso);
 }
 @media (max-width: 600px) {
   .inputRow {
@@ -169,7 +170,7 @@
   .searchBtn {
     width: 100%;
   }
-} /* Mode toggle */
+}
 .modeRow {
   display: flex;
   gap: 8px;
@@ -183,28 +184,81 @@
   gap: 2px;
   padding: 8px 20px;
   background: #fff;
-  border: 1.5px solid var(--parchment-mid);
+  border: 1.5px solid var(--weathered-sand);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s;
   min-width: 90px;
 }
 .modeBtn:hover {
-  border-color: var(--amber-light);
+  border-color: var(--apricot-glow);
 }
 .modeActive {
-  background: var(--amber-pale);
-  border-color: var(--amber) !important;
+  background: var(--butter-veil);
+  border-color: var(--honey-gold) !important;
 }
 .modeLabel {
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--midnight-espresso);
 }
 .modeDesc {
   font-size: 10px;
   color: var(--text-faint);
 }
 .modeActive .modeLabel {
-  color: var(--amber);
+  color: var(--honey-gold);
 }
+
+.themeToggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--weathered-sand);
+  background: #fff;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.themeToggle:hover {
+  border-color: var(--apricot-glow);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.themeToggleActive {
+  background: var(--midnight-espresso);
+  color: var(--vanilla-cream);
+  border-color: var(--midnight-espresso);
+}
+
+.themeIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .themeToggle {
+    top: 6px;
+    left: 6px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .themeIcon {
+    font-size: 16px;
+  }
+}
+

@@ -2,23 +2,53 @@ import { useEffect, useState } from "react";
 import { getStoryById } from "../api/stories";
 import styles from "./StoryModal.module.css";
 
-export default function StoryModal({ story, onClose, onGenreClick }) {
+export default function StoryModal({ story, onClose, onGenreClick, darkStoryTheme = false }) {
   const [storyData, setStoryData] = useState(story);
-  const [loading, setLoading] = useState(!story);
+  const [loading, setLoading] = useState(!story?.content);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch full content only when caller passed a partial story payload.
-    if (!story || !story.content) {
-      getStoryById(story?.id)
-        .then(setStoryData)
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
+    let cancelled = false;
+
+    setStoryData(story ?? null);
+    setError(null);
+    setLoading(!story?.content);
+
+    if (!story) {
+      return () => {
+        cancelled = true;
+      };
     }
+
+    if (story.content) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    getStoryById(story.id)
+      .then((data) => {
+        if (!cancelled) {
+          setStoryData(data);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [story]);
 
   const handleBackdropClick = (e) => {
-    // Close only when clicking outside the modal content.
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -27,10 +57,13 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
   if (loading) {
     return (
       <div className={styles.backdrop} onClick={handleBackdropClick}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.center}>
             <div className={styles.spinner} />
-            <p>Loading storyâ€¦</p>
+            <p>Loading story...</p>
           </div>
         </div>
       </div>
@@ -40,7 +73,10 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
   if (error || !storyData) {
     return (
       <div className={styles.backdrop} onClick={handleBackdropClick}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.center}>
             <span className={styles.notFoundIcon}></span>
             <h2>Story not found</h2>
@@ -55,8 +91,11 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
 
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeBtn} onClick={onClose}>
+      <div
+        className={`${styles.modal} ${darkStoryTheme ? styles.modalDark : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button type="button" className={styles.closeBtn} onClick={onClose}>
           <svg
             width="20"
             height="20"
@@ -90,7 +129,6 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
 
           <main className={styles.content}>
             {storyData.content ? (
-              // Preserve intentional paragraph breaks from backend text.
               storyData.content
                 .split("\n")
                 .map((para, i) =>
@@ -105,3 +143,4 @@ export default function StoryModal({ story, onClose, onGenreClick }) {
     </div>
   );
 }
+

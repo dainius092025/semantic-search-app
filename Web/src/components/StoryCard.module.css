@@ -1,6 +1,6 @@
 .card {
   background: #fff;
-  border: 1px solid var(--parchment-mid);
+  border: 1px solid var(--weathered-sand);
   border-radius: var(--radius-md);
   padding: 22px 24px 18px;
   cursor: pointer;
@@ -17,7 +17,7 @@
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
-  border-color: var(--amber-light);
+  border-color: var(--apricot-glow);
 }
 
 .top {
@@ -45,7 +45,7 @@
   font-family: var(--font-display);
   font-size: 19px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--midnight-espresso);
   line-height: 1.25;
   margin-bottom: 4px;
   letter-spacing: -0.01em;
@@ -115,13 +115,13 @@
   align-items: center;
   justify-content: space-between;
   padding-top: 12px;
-  border-top: 1px solid var(--parchment-dark);
+  border-top: 1px solid var(--oatmilk);
 }
 
 .readMore {
   font-size: 12px;
   font-weight: 500;
-  color: var(--amber);
+  color: var(--honey-gold);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -136,4 +136,40 @@
   font-size: 11px;
   color: var(--text-faint);
   font-family: monospace;
+}
+
+.cardDark {
+  background: #1e1915;
+  border-color: #43372f;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.cardDark:hover {
+  border-color: var(--honey-gold);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+}
+
+.cardDark .title {
+  color: var(--vanilla-cream);
+}
+
+.cardDark .author,
+.cardDark .excerpt,
+.cardDark .year,
+.cardDark .scoreLabel,
+.cardDark .storyId {
+  color: #c8bda8;
+}
+
+.cardDark .scoreTrack {
+  background: #2b241f;
+  border-color: #43372f;
+}
+
+.cardDark .footer {
+  border-top-color: #43372f;
+}
+
+.cardDark .readMore {
+  color: #f2c14d;
 }

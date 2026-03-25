@@ -9,7 +9,7 @@ const SUGGESTIONS = [
   "technology controlling people",
 ];
 
-export default function SearchBar({ onSearch, loading }) {
+export default function SearchBar({ onSearch, loading, darkStoryTheme, onToggleStoryTheme }) {
   const [query, setQuery] = useState("");
 
   const handleSubmit = () => {
@@ -31,6 +31,18 @@ export default function SearchBar({ onSearch, loading }) {
 
   return (
     <div className={styles.wrapper}>
+      <button
+        type="button"
+        className={`${styles.themeToggle} ${darkStoryTheme ? styles.themeToggleActive : ""}`}
+        onClick={onToggleStoryTheme}
+        aria-pressed={darkStoryTheme}
+        aria-label={darkStoryTheme ? "Switch to day story theme" : "Switch to night story theme"}
+      >
+        <span className={styles.themeIcon} aria-hidden="true">
+          {darkStoryTheme ? "☾" : "☀"}
+        </span>
+      </button>
+
       <p className={styles.eyebrow}>
         <a href="/">Story Discovery Engine</a>
       </p>
@@ -42,7 +54,7 @@ export default function SearchBar({ onSearch, loading }) {
       </h1>
 
       <p className={styles.sub}>
-        Describe a theme, emotion, or situation — the engine finds the most
+        Describe a theme, emotion, or situation - the engine finds the most
         relevant stories from the collection.
       </p>
 
@@ -70,22 +82,24 @@ export default function SearchBar({ onSearch, loading }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type Here…"
+            placeholder="Type Here..."
             autoFocus
           />
 
           {query && (
             <button
+              type="button"
               className={styles.clearBtn}
               onClick={() => setQuery("")}
               aria-label="Clear"
             >
-              ✕
+              x
             </button>
           )}
         </div>
 
         <button
+          type="button"
           className={styles.searchBtn}
           onClick={handleSubmit}
           disabled={!query.trim() || loading}
@@ -99,6 +113,7 @@ export default function SearchBar({ onSearch, loading }) {
         {SUGGESTIONS.map((suggestion) => (
           <button
             key={suggestion}
+            type="button"
             className={styles.tag}
             onClick={() => handleSuggestion(suggestion)}
           >
@@ -106,6 +121,8 @@ export default function SearchBar({ onSearch, loading }) {
           </button>
         ))}
       </div>
+
     </div>
   );
 }
+

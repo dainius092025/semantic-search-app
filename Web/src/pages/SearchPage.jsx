@@ -9,17 +9,19 @@ import styles from "./SearchPage.module.css";
 
 export default function SearchPage() {
   const location = useLocation();
-  const { results, loading, error, hasSearched, lastQuery, search, mode, setMode } = useSearch();
+  const { results, loading, error, hasSearched, lastQuery, search } = useSearch();
   const resultsRef = useRef(null);
   const [selectedStory, setSelectedStory] = useState(null);
   const [genreFilter, setGenreFilter] = useState("all");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [darkStoryTheme, setDarkStoryTheme] = useState(false);
 
   useEffect(() => {
     if (location.state?.initialSearch) {
       setGenreFilter("all");
-      search(location.state.initialSearch, mode);
+      search(location.state.initialSearch);
     }
-  }, [location.state?.initialSearch]);
+  }, [location.state?.initialSearch, search]);
 
   useEffect(() => {
     if (hasSearched && !loading && resultsRef.current) {
@@ -27,20 +29,32 @@ export default function SearchPage() {
     }
   }, [hasSearched, loading]);
 
-  function handleSearch(query, searchMode) {
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 320);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  function handleSearch(query) {
     setGenreFilter("all");
-    search(query, searchMode);
+    search(query);
   }
 
   function handleGenreClick(genre) {
     if (!genre) return;
     setGenreFilter(genre);
-    search(genre, mode);
+    search(genre);
     setSelectedStory(null);
   }
 
   async function handleSurpriseClick() {
-    // Prefer current search results, otherwise fetch all stories
     try {
       let pool = Array.isArray(results) && results.length ? results : null;
       if (!pool) {
@@ -51,9 +65,11 @@ export default function SearchPage() {
 
       const rand = pool[Math.floor(Math.random() * pool.length)];
       setSelectedStory(rand);
-    } catch (err) {
-      // ignore errors silently for hotspot
-    }
+    } catch (err) {}
+  }
+
+  function handleScrollTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -63,8 +79,8 @@ export default function SearchPage() {
           <SearchBar
             onSearch={handleSearch}
             loading={loading}
-            mode={mode}
-            onModeChange={setMode}
+            darkStoryTheme={darkStoryTheme}
+            onToggleStoryTheme={() => setDarkStoryTheme((value) => !value)}
           />
         </div>
 
@@ -79,7 +95,7 @@ export default function SearchPage() {
           <div className={styles.loadingDots}>
             <span /><span /><span />
           </div>
-          <p>Searching the collection…</p>
+          <p>Searching the collection...</p>
         </div>
       )}
 
@@ -91,6 +107,7 @@ export default function SearchPage() {
             onStoryClick={setSelectedStory}
             genreFilter={genreFilter}
             onGenreChange={setGenreFilter}
+            darkStoryTheme={darkStoryTheme}
           />
         )}
       </div>
@@ -100,6 +117,7 @@ export default function SearchPage() {
           story={selectedStory}
           onClose={() => setSelectedStory(null)}
           onGenreClick={handleGenreClick}
+          darkStoryTheme={darkStoryTheme}
         />
       )}
       </div>
@@ -126,6 +144,17 @@ export default function SearchPage() {
           <img className={styles.sideImageAsset} src="/bilde.png" alt="Bookshelf" />
         </a>
       </div>
+      {showScrollTop && (
+        <button
+          type="button"
+          className={styles.scrollTopButton}
+          onClick={handleScrollTop}
+          aria-label="Back to top"
+        >
+          Top
+        </button>
+      )}
     </div>
   );
 }
+
