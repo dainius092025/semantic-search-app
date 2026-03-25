@@ -27,14 +27,19 @@ public class SearchService : ISearchService
     // Performs hybrid search by combining semantic similarity and metadata matching. Semantic search finds stories based on meaning using embeddings, while metadata search finds exact matches (title, author, genre, etc.).
     public async Task<List<SearchResultDTO>> HybridSearchAsync(SearchRequestDTO request)
     {
+        // Normalizing user input to make search consistent
+        var normalizedQuery = request.Query
+            .Trim()   
+            .ToLower();
+
          // Firstly we convert the user's query into an embedding vector using the Ollama service. This allows us to compare the meaning of the query with stored story embeddings.         
-        var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query, EmbeddingTask.Query);
+        var embedding = await _ollamaService.GenerateEmbeddingAsync(normalizedQuery, EmbeddingTask.Query);
 
         // Then we perform semantic search in the database and return stories with a similarity score based on how close they are to the query embedding.
         var semanticResults = await _storyRepository.SearchAsync(embedding, request.Limit);
 
         // Now we do metadata (keyword-based) search.This finds stories that match exact words or phrases in fields like title, author
-        var metadataResults = await _storyRepository.SearchByMetadataAsync(request.Query);
+        var metadataResults = await _storyRepository.SearchByMetadataAsync(normalizedQuery);
 
         // collecting all unique storu IDs from both semantic(comes from vector similarity) and metadata (comes from keyword matching) results. SO using UNION ensures that stories appearing in both results sets are not diplicates and found by only one method are still included.Thi creates a unified set of conditions for hybrid ranking.
         var allStoryIds = semanticResults
@@ -98,9 +103,14 @@ public class SearchService : ISearchService
 
     // Performs metadata-based (keyword) search only.This search matches exact words or phrases in fields: title, author, genre, year, without using embeddings.
     public async Task<List<SearchResultDTO>> MetadataSearchAsync(SearchRequestDTO request)
-    {
+    {   
+        // Normalizing user input to make search consistent
+        var normalizedQuery = request.Query
+            .Trim()   
+            .ToLower();
+
         // First we query the database for stories that match the keyword search
-        var stories = await _storyRepository.SearchByMetadataAsync(request.Query);
+        var stories = await _storyRepository.SearchByMetadataAsync(normalizedQuery);
 
         // Thenwe map the results to DTOs and limit the number of returned items
         var results = stories
