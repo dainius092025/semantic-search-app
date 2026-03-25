@@ -1,6 +1,7 @@
 
 using Backend.Services.Interfaces;
 using Backend.Services.DataLoading;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Services;
 
@@ -13,21 +14,21 @@ public class IngestionService : IStoryIngestionService
     private readonly IStoryRepository _repository;
     private readonly IOllamaService _ollama;
     private readonly StoryDataLoader _dataLoader;
+    private readonly ILogger<IngestionService> _logger;
 
-    public IngestionService(IStoryRepository repository, IOllamaService ollama)
+    public IngestionService(IStoryRepository repository, IOllamaService ollama, ILogger<IngestionService> logger)
     {
         _repository = repository;
         _ollama = ollama;
         _dataLoader = new StoryDataLoader();
+        _logger = logger;
     }
 
     public async Task RunFullIngestionAsync()
     {
         // 1. Load metadata and raw text from files
         var rawStories = await _dataLoader.LoadAllStoriesAsync();
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"Loaded {rawStories.Count} raw stories.");
-        Console.ResetColor();
+        _logger.LogInformation("Loaded {Count} raw stories.", rawStories.Count);
 
         // 2. Process stories one by one
         foreach (var story in rawStories)
@@ -35,9 +36,7 @@ public class IngestionService : IStoryIngestionService
             // Check if story is already fully ingested to avoid duplicates. We check for full ingestion (embedding + summary) not just existence, because a story could exist in the database but still be missing generated data if Ollama failed previously
             if (await _repository.IsFullyIngestedAsync(story.Id))
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Skipping story {story.Id} - already fully ingested.");
-                Console.ResetColor();
+                _logger.LogInformation("Skipping story {Id} - already fully ingested.", story.Id);
                 continue;
             }
 
@@ -46,9 +45,7 @@ public class IngestionService : IStoryIngestionService
                 
                 if (vector == null || vector.Length == 0)
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Embedding generation failed for story {story.Id}. Skipping.");
-                        Console.ResetColor();
+                        _logger.LogError("Embedding generation failed for story {Id}. Skipping.", story.Id);
                         continue;
                     }
 
@@ -63,9 +60,7 @@ public class IngestionService : IStoryIngestionService
                     
                     if (string.IsNullOrWhiteSpace(story.Summary))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Summary generation failed for story {story.Id}. Skipping.");
-                        Console.ResetColor();
+                        _logger.LogError("Summary generation failed for story {Id}. Skipping.", story.Id);
                         continue;
                     }
                     
@@ -73,17 +68,14 @@ public class IngestionService : IStoryIngestionService
                 else
                 {
                     //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
-                    Console.ForegroundColor = ConsoleColor.Red;
                     story.Summary = "No summary available.";
-                    Console.ResetColor();
+                    _logger.LogWarning("Story {Id} has empty content. Summary set to default.", story.Id);
                 }
 
                 // 3. Save to Database
                 await _repository.AddAsync(story);
                 //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Ingested story {story.Id} successfully.");
-                Console.ResetColor();
+                _logger.LogInformation("Ingested story {Id} successfully.", story.Id);
         }
     }
 

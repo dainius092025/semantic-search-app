@@ -46,25 +46,31 @@ public class StoryRepository : IStoryRepository
     public async Task<Story?> GetByIdAsync(int id) => await _context.Stories.FindAsync(id);
     public async Task<bool> ExistsAsync(int id) => await _context.Stories.AnyAsync(s => s.Id == id);
 
-    // Checks if a story is fully ingested by verifying that both the summary and embedding are present and valid. A story that exists but has an empty summary or empty embedding is not considered fully ingested.
-    // Returns true if complete, false if incomplete or not found.
+    public async Task<Story?> GetRandomAsync()
+    {
+        // Generates a random sort order in the database using a GUID
+        return await _context.Stories.OrderBy(s => Guid.NewGuid()).FirstOrDefaultAsync();
+    }
+
     public async Task<bool> IsFullyIngestedAsync(int id)
     {
+        // Checks if the story exists AND has both an embedding and a summary
         return await _context.Stories
-            .AnyAsync(s => s.Id == id &&
-                    s.Embedding != null &&
-                    s.Summary != null &&
-                    s.Summary != string.Empty);
+            .AnyAsync(s => s.Id == id && s.Embedding != null && !string.IsNullOrWhiteSpace(s.Summary));
     }
 
     //searches only in metadata: title, author, year, genre,  using simple matching "contains"
     public async Task<List<Story>> SearchByMetadataAsync(string query)
     {
         var normalizedQuery = query.Trim().ToLower();
+        
+        // Try to parse the year, if it fails, yearQuery will be null
+        int? yearQuery = int.TryParse(query, out int y) ? y : null;
+
         var results = await _context.Stories
             .Where (s => s.Title.ToLower().Contains(normalizedQuery) ||//i has to be case sensitive.
                     s. Author.ToLower().Contains(normalizedQuery) ||
-                    s.Year.ToString() == query||
+                    (yearQuery.HasValue && s.Year == yearQuery.Value) ||
                     s.Genre.ToLower().Contains(normalizedQuery))
             .OrderByDescending(s => s.Title.ToLower().Contains(normalizedQuery))//title comes first
             .ThenByDescending(s => s.Author.ToLower().Contains(normalizedQuery))//then this
@@ -78,12 +84,4 @@ public class StoryRepository : IStoryRepository
     {
         return await _context.Stories.ToListAsync();
     }
-
-    // Retrieves one random story from the database. We use Guid.NewGuid() to assign a random value to each story,then order by that value and take the first result.Returns null if the database is empty.
-    public async Task<Story?> GetRandomAsync()
-    {
-        return await _context.Stories
-            .OrderBy(s => Guid.NewGuid())
-            .FirstOrDefaultAsync();
-    }   
 }
