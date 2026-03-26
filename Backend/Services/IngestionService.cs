@@ -40,8 +40,21 @@ public class IngestionService : IStoryIngestionService
                 continue;
             }
 
-                // Generate Embedding
-                var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+/*                 // Generate Embedding
+                //var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+
+                // this improves text for embedding generation and helps semantic search understand not only the story content, but also important metadata like title, author, and genre.
+                var embeddingText = $"""
+                Title: {story.Title}
+                Author: {story.Author}
+                Genre: {story.Genre}
+
+                Content:
+                {story.Content}
+                """;
+
+                // Generates embedding from fuller text instead of raw content only
+                var vector = await _ollama.GenerateEmbeddingAsync(embeddingText);
                 
                 if (vector == null || vector.Length == 0)
                     {
@@ -70,7 +83,47 @@ public class IngestionService : IStoryIngestionService
                     //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
                     story.Summary = "No summary available.";
                     _logger.LogWarning("Story {Id} has empty content. Summary set to default.", story.Id);
+                } */
+
+                // Generate Summary first, we need this before embedding so we can include the summary in the embedding text. This should imporve theme/feeling search because summaries are shorter and they try to capture the meaning of the story
+                if (!string.IsNullOrWhiteSpace(story.Content))
+                {
+                    story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
+
+                    if (string.IsNullOrWhiteSpace(story.Summary))
+                    {
+                        _logger.LogError("Summary generation failed for story {Id}. Skipping.", story.Id);
+                        continue;
+                    }
                 }
+                else
+                {
+                    // If content is empty, we keep a fallback summary and log a warning.
+                    story.Summary = "No summary available.";
+                    _logger.LogWarning("Story {Id} has empty content. Summary set to default.", story.Id);
+                }
+
+                // Build better text for embedding generation, we include metadata, summary, and content so the embedding contains both the story details and a shorter meaning-focused description.
+                var embeddingText = $"""
+                Title: {story.Title}
+                Author: {story.Author}
+                Genre: {story.Genre}
+                Summary: {story.Summary}
+
+                Content:
+                {story.Content}
+                """;
+
+                // Generate embedding from the more meaningful text
+                var vector = await _ollama.GenerateEmbeddingAsync(embeddingText);
+
+                if (vector == null || vector.Length == 0)
+                {
+                    _logger.LogError("Embedding generation failed for story {Id}. Skipping.", story.Id);
+                    continue;
+                }
+
+                story.Embedding = new Pgvector.Vector(vector);
 
                 // 3. Save to Database
                 await _repository.AddAsync(story);

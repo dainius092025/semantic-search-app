@@ -28,8 +28,8 @@ Content-Type: application/json
 
 
 {
-  "query": " love ",
-  "limit": 10
+  "query": "after years of isolation, a man keeps performing his duty even when the world has moved on",
+  "limit": 5
 }
 
 
