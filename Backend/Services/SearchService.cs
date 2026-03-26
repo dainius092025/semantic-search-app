@@ -32,8 +32,12 @@ public class SearchService : ISearchService
             .Trim()   
             .ToLower();
 
+        // improved query for semantic understanding (i read is it better for themes/feelings)
+        var enrichedQuery = $"A short story about the theme, feeling, or situation of {normalizedQuery}";
+
+
          // Firstly we convert the user's query into an embedding vector using the Ollama service. This allows us to compare the meaning of the query with stored story embeddings.         
-        var embedding = await _ollamaService.GenerateEmbeddingAsync(normalizedQuery, EmbeddingTask.Query);
+        var embedding = await _ollamaService.GenerateEmbeddingAsync(enrichedQuery, EmbeddingTask.Query);
 
         // Then we perform semantic search in the database and return stories with a similarity score based on how close they are to the query embedding.
         var semanticResults = await _storyRepository.SearchAsync(embedding, request.Limit);
@@ -88,9 +92,18 @@ public class SearchService : ISearchService
             var keywordScore = metadataResults.Any(story => story.Id == dto.Id)
                 ? 1.0
                 : 0.0;
+                
 
             // Combine both scores into a final relevance score
-            dto.Similarity = (semanticScore * SemanticWeight) + (keywordScore * KeywordWeight);
+            var finalScore = (semanticScore * SemanticWeight) + (keywordScore * KeywordWeight);
+
+            //trying to show stronger matches stand out more clearly, squaring the score keeps the ranking order, but spreads the values apart.
+
+            // Converting to percentage (0–100) for better readability
+            var percentage = finalScore * 100 + 10;
+            percentage = Math.Min(percentage, 100);
+
+            dto.Similarity = Math.Round(percentage, 2);
         }
         //finaly we organize results by final score (highest first) and limit the output
         return combinedResults

@@ -40,42 +40,48 @@ public class IngestionService : IStoryIngestionService
                 continue;
             }
 
-                // Generate Embedding
-                var vector = await _ollama.GenerateEmbeddingAsync(story.Content, EmbeddingTask.Document);
-                
-                if (vector == null || vector.Length == 0)
-                    {
-                        _logger.LogError("Embedding generation failed for story {Id}. Skipping.", story.Id);
-                        continue;
-                    }
+            // Generate summary first so we can include it in the embedding text
+            if (!string.IsNullOrWhiteSpace(story.Content))
+            {
+                story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
 
-                story.Embedding = new Pgvector.Vector(vector);
-
-                // Generate Summary only if content is not empty
-                //This prevents sending empty text to the LLM, which can produce confusing responses.
-                if (!string.IsNullOrWhiteSpace(story.Content))
+                if (string.IsNullOrWhiteSpace(story.Summary))
                 {
-                    // Generate Summary
-                    story.Summary = await _ollama.GenerateSummaryAsync(story.Content);
-                    
-                    if (string.IsNullOrWhiteSpace(story.Summary))
-                    {
-                        _logger.LogError("Summary generation failed for story {Id}. Skipping.", story.Id);
-                        continue;
-                    }
-                    
+                    _logger.LogError("Summary generation failed for story {Id}. Skipping.", story.Id);
+                    continue;
                 }
-                else
-                {
-                    //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
-                    story.Summary = "No summary available.";
-                    _logger.LogWarning("Story {Id} has empty content. Summary set to default.", story.Id);
-                }
+            }
+            else
+            {
+                story.Summary = "No summary available.";
+                _logger.LogWarning("Story {Id} has empty content. Summary set to default.", story.Id);
+            }
 
-                // 3. Save to Database
-                await _repository.AddAsync(story);
-                //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
-                _logger.LogInformation("Ingested story {Id} successfully.", story.Id);
+            // Build better text for embedding generation
+            var embeddingText = $"""
+            Title: {story.Title}
+            Author: {story.Author}
+            Genre: {story.Genre}
+            Summary: {story.Summary}
+
+            Content:
+            {story.Content}
+            """;
+
+            var vector = await _ollama.GenerateEmbeddingAsync(embeddingText, EmbeddingTask.Document);
+
+            if (vector == null || vector.Length == 0)
+            {
+                _logger.LogError("Embedding generation failed for story {Id}. Skipping.", story.Id);
+                continue;
+            }
+
+            story.Embedding = new Pgvector.Vector(vector);
+
+            // 3. Save to Database
+            await _repository.AddAsync(story);
+            //just because it is nice to see in the console when something is wrong with the data, instead of just getting empty summaries that can be confusing when debugging
+            _logger.LogInformation("Ingested story {Id} successfully.", story.Id);
         }
     }
 
