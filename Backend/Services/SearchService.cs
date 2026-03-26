@@ -94,13 +94,23 @@ public class SearchService : ISearchService
                 : 0.0;
                 
 
-            // Combine both scores into a final relevance score
-            var finalScore = (semanticScore * SemanticWeight) + (keywordScore * KeywordWeight);
+            /* // Combine both scores into a final relevance score
+            var finalScore = (semanticScore * SemanticWeight) + (keywordScore * KeywordWeight); */
 
+            var finalScore = semanticScore;
+
+            if (keywordScore > 0)
+            {
+                finalScore += 0.1; // small keyword bonus
+            }
+
+            finalScore = Math.Min(finalScore, 1.0);
+
+            
             //trying to show stronger matches stand out more clearly, squaring the score keeps the ranking order, but spreads the values apart.
 
             // Converting to percentage (0–100) for better readability
-            var percentage = finalScore * 100 + 10;
+            var percentage = finalScore * 100;
             percentage = Math.Min(percentage, 100);
 
             dto.Similarity = Math.Round(percentage, 2);
