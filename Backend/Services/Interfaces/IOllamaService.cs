@@ -2,6 +2,12 @@
 
 namespace Backend.Services.Interfaces;
 
+public enum EmbeddingTask
+{
+    Query,
+    Document
+}
+
 public interface IOllamaService
 {
     /* NOTE FOR ME SO I GET IT:
@@ -13,8 +19,9 @@ public interface IOllamaService
     // Embedding   = a vector representing the meaning of the text
     // Async       = naming convention for asynchronous methods
     // string text = accepts plain text as input
+    // task        = specifies if the embedding is for a search query or a document (important for Nomic models)
 
-    Task<float[]> GenerateEmbeddingAsync(string text);
+    Task<float[]> GenerateEmbeddingAsync(string text, EmbeddingTask task = EmbeddingTask.Document);
 
     /// <summary>
     /// Waits for Ollama to be ready and for required models to be downloaded.

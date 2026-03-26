@@ -108,8 +108,19 @@ public class OllamaService : IOllamaService
                 //returns a list of decimal numbers that represent the embedding vector
                     //the name of the method
                         //accepts plain text as input
-    public async Task<float[]> GenerateEmbeddingAsync(string text)
+                        //task = specifies if the embedding is for a search query or a document
+    public async Task<float[]> GenerateEmbeddingAsync(string text, EmbeddingTask task = EmbeddingTask.Document)
     {
+        // For nomic-embed-text, we should use specific prefixes for query and document.
+        // https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+        var processedText = text.ToLower(); // ← Normalize to lowercase
+        
+        if (_embeddingModel.Contains("nomic-embed-text"))
+        {
+            var prefix = task == EmbeddingTask.Query ? "search_query: " : "search_document: ";
+            processedText = prefix + processedText;
+        }
+
         //sends the text to Ollama and asks for an embedding
                     //"await" means to wait for ollama to respond before continuing
                                                             //here we tell ollama what we want
@@ -119,7 +130,7 @@ public class OllamaService : IOllamaService
                 Model = _embeddingModel,
 
                 //the text we want to convertto vector
-                Input = new List<string> { text.ToLower() }  // ← Normalize to lowercase
+                Input = new List<string> { processedText }
             }) );
 
         //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.

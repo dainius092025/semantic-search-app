@@ -41,7 +41,7 @@ public class IngestionService : IStoryIngestionService
             }
 
                 // Generate Embedding
-                var vector = await _ollama.GenerateEmbeddingAsync(story.Content);
+                var vector = await _ollama.GenerateEmbeddingAsync(story.Content, EmbeddingTask.Document);
                 
                 if (vector == null || vector.Length == 0)
                     {

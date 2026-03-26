@@ -28,7 +28,7 @@ public class SearchService : ISearchService
     public async Task<List<SearchResultDTO>> HybridSearchAsync(SearchRequestDTO request)
     {
          // Firstly we convert the user's query into an embedding vector using the Ollama service. This allows us to compare the meaning of the query with stored story embeddings.         
-        var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query);
+        var embedding = await _ollamaService.GenerateEmbeddingAsync(request.Query, EmbeddingTask.Query);
 
         // Then we perform semantic search in the database and return stories with a similarity score based on how close they are to the query embedding.
         var semanticResults = await _storyRepository.SearchAsync(embedding, request.Limit);

@@ -17,6 +17,10 @@ isolation even if those exact words are never used.
 1. User enters a search query
 2. The query is sent to Ollama (a local AI service)
 3. Ollama converts the query into a list of numbers called an **embedding vector**
+   - For `nomic-embed-text` models, a specific prefix is added to the text before embedding:
+     - `search_query: ` is added to user queries
+     - `search_document: ` is added to story content during ingestion
+   - This prefix ensures the model is optimized for either finding information (query) or being found (document).
 4. The database compares this vector against all stored story vectors
 5. Stories with the closest meaning are returned first
 
