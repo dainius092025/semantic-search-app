@@ -17,6 +17,7 @@ public class OllamaService : IOllamaService
     private readonly OllamaApiClient _ollama;
 
     private readonly string _summaryModel;
+    private readonly string _embeddingModel;
     private readonly ILogger<OllamaService> _logger;
 
     public OllamaService(IConfiguration configuration, ILogger<OllamaService> logger)
@@ -24,6 +25,7 @@ public class OllamaService : IOllamaService
         var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
         _ollama = new OllamaApiClient(ollamaUrl);
         _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
+        _embeddingModel = configuration["Ollama:EmbeddingModel"] ?? "nomic-embed-text";
         _ollama.SelectedModel = _summaryModel;
         _logger = logger;
     }
