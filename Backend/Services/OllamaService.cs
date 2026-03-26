@@ -114,10 +114,10 @@ public class OllamaService : IOllamaService
         var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
             {
                 //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
-                Model = "nomic-embed-text",
+                Model = _embeddingModel,
 
-                //the text we want to  convertto vector
-                Input = new List<string> { text }
+                //the text we want to convertto vector
+                Input = new List<string> { text.ToLower() }  // ← Normalize to lowercase
             }) );
 
         //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
