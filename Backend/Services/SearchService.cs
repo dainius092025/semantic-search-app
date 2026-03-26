@@ -10,10 +10,8 @@ public class SearchService : ISearchService
     private readonly IOllamaService _ollamaService;
     private readonly IStoryRepository _storyRepository;
 
-    // Defines weighting for hybrid ranking.
-    // Semantic relevance is prioritized, but keyword matches still influence results.
-    private const double SemanticWeight = 0.7;
-    private const double KeywordWeight = 0.3;
+    // Defines how keyword matches influence the final score.Semantic similarity is the main signal, and keyword matches add a small bonus without reducing the semantic score. So it is not weighted hybrid anymore it is semantic first + keyword bonus. We chose to use semantic similarity as the base score to avoid penalizing abstract queries, and apply keyword matches only as a bonus.
+    private const double KeywordBonus = 0.1;
 
     // Dependencies are injected via constructor:
     // - IOllamaService: generates embeddings for semantic search
@@ -25,7 +23,7 @@ public class SearchService : ISearchService
     }
 
     // Performs hybrid search by combining semantic similarity and metadata matching. Semantic search finds stories based on meaning using embeddings, while metadata search finds exact matches (title, author, genre, etc.).
-    public async Task<List<SearchResultDTO>> HybridSearchAsync(SearchRequestDTO request)
+    public async Task<List<SearchResultDTO>> SemanticSearchWithKeywordBoostAsync(SearchRequestDTO request)
     {
         // Normalizing user input to make search consistent
         var normalizedQuery = request.Query

@@ -55,7 +55,7 @@ public class SearchController : ControllerBase
         {
             //******NEW******
             //all search-related logic (semantic, keyword, and hybrid ranking) is encapsulated inside SearchService. The controller simply delegates the request, resulting in cleaner, more maintainable, and testable code.
-            var results = await _searchService.HybridSearchAsync(request);
+            var results = await _searchService.SemanticSearchWithKeywordBoostAsync(request);
             return Ok(results);
         }
         catch (Exception ex)

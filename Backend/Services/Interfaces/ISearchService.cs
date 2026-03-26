@@ -6,7 +6,7 @@ namespace Backend.Services.Interfaces;
 public interface ISearchService
 {
     // Performs hybrid search by combining semantic similarity (embeddings)and metadata-based keyword matching, returning ranked results
-    Task<List<SearchResultDTO>> HybridSearchAsync(SearchRequestDTO request);
+    Task<List<SearchResultDTO>> SemanticSearchWithKeywordBoostAsync(SearchRequestDTO request);
 
     // Performs metadata-only search using direct keyword matching, e.g., title, author, genre, year without semantic embeddings.
         Task<List<SearchResultDTO>> MetadataSearchAsync(SearchRequestDTO request);
