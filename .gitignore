@@ -423,3 +423,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Temp publish folders (local builds)
+**/temp-publish/
+**/.temp-publish/
