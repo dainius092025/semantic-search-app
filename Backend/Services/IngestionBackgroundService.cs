@@ -23,19 +23,24 @@ public class IngestionBackgroundService : BackgroundService
     {
         _logger.LogInformation("Background Ingestion Service is warming up...");
 
-        // 1. Wait a few seconds to ensure Docker containers (Postgres & Ollama) are fully initialized
-        // This prevents "Connection Refused" errors on cold starts.
-        await Task.Delay(7000, stoppingToken); 
-
-        _logger.LogInformation("Starting automatic ingestion check...");
-
         try
         {
-            // 2. Create a Scope. 
-            // We MUST do this because IngestionService and Repository are 'Scoped' 
-            // (they live and die with a database connection).
+            // 1. Create a Scope to get the Ollama service
             using (var scope = _serviceProvider.CreateScope())
             {
+                var ollamaService = scope.ServiceProvider.GetRequiredService<IOllamaService>();
+                
+                // 2. Wait for Ollama and models to be ready
+                bool ready = await ollamaService.WaitForModelsAsync(stoppingToken);
+                
+                if (!ready)
+                {
+                    _logger.LogWarning("Ollama was not ready in time. Skipping automatic ingestion.");
+                    return;
+                }
+
+                _logger.LogInformation("Starting automatic ingestion check...");
+
                 var ingestionService = scope.ServiceProvider.GetRequiredService<IStoryIngestionService>();
 
                 // 3. Run the ingestion logic

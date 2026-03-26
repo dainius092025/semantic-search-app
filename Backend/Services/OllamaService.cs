@@ -17,20 +17,53 @@ public class OllamaService : IOllamaService
     private readonly OllamaApiClient _ollama;
 
     private readonly string _summaryModel;
+    private readonly ILogger<OllamaService> _logger;
 
-    // The IConfiguration service is injected by ASP.NET Core's dependency injection system.
-    public OllamaService(IConfiguration configuration)//constructor, a special method that runs automatically when we create a new instance of the OllamaService class. We use it to initialize the _ollama variable and establish a connection to the Ollama API.
+    public OllamaService(IConfiguration configuration, ILogger<OllamaService> logger)
     {
-        //here we create a new instance of the OllamaApiClient and pass in the URL of our Ollama API. This sets up the connection so we can start sending requests to generate embeddings and summaries.
-        // We read the URL from configuration (appsettings.json) to avoid hardcoding it.
-        // This makes the application more flexible for different environments.
         var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
         _ollama = new OllamaApiClient(ollamaUrl);
-
-     _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
-    _ollama.SelectedModel = _summaryModel;
+        _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
+        _ollama.SelectedModel = _summaryModel;
+        _logger = logger;
     }
 
+    public async Task<bool> WaitForModelsAsync(CancellationToken ct)
+    {
+        _logger.LogInformation("Waiting for Ollama models ({EmbedModel} and {SummaryModel}) to be ready...", "nomic-embed-text", _summaryModel);
+
+        const int maxRetries = 20; // 20 * 10s = ~3.3 minutes
+        for (int i = 0; i < maxRetries; i++)
+        {
+            if (ct.IsCancellationRequested) return false;
+
+            try
+            {
+                var models = await _ollama.ListLocalModelsAsync(ct);
+                var modelNames = models.Select(m => m.Name).ToList();
+
+                bool embedReady = modelNames.Any(n => n.Contains("nomic-embed-text"));
+                bool summaryReady = modelNames.Any(n => n.Contains(_summaryModel));
+
+                if (embedReady && summaryReady)
+                {
+                    _logger.LogInformation("All required Ollama models are ready!");
+                    return true;
+                }
+
+                _logger.LogInformation("Still waiting for models... (Found: {Models})", string.Join(", ", modelNames));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Ollama connection not yet available: {Message}", ex.Message);
+            }
+
+            await Task.Delay(10000, ct); // Wait 10 seconds between checks
+        }
+
+        _logger.LogError("Timed out waiting for Ollama models.");
+        return false;
+    }
 
     // this is my helper method hat retries an operation if it fails, in here <T> measn that this method can return any type of data.
     private async Task<T> RetryAsync<T>(Func<Task<T>> action, int maxRetries = 3)

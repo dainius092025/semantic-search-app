@@ -16,8 +16,13 @@ public interface IOllamaService
 
     Task<float[]> GenerateEmbeddingAsync(string text);
 
+    /// <summary>
+    /// Waits for Ollama to be ready and for required models to be downloaded.
+    /// This is crucial for first-time startup in Docker.
+    /// </summary>
+    Task<bool> WaitForModelsAsync(CancellationToken ct);
 
-    /* Users need a short sumamry to decide if a story is releveant without reading the full text. We use Ollama to generate this automaticaly instead of writting it manualy. It sends the story to Olama and returns a 1-2 sentence summary that describe the meaning and theme of the story, so later we can use it to display a short description under each search result. */
+    /* Users need a short sumamry to decide if a story is releveant without reading the full text. */
 
     // string      = returns plain text (the generated summary)
     // Summary     = a 1-2 sentence description of the story
