@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 *.env
+b.md
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -297,9 +298,15 @@ FakesAssemblies/
 # GhostDoc plugin setting file
 *.GhostDoc.xml
 
-# Node.js Tools for Visual Studio
-.ntvs_analysis.dat
+# Node.js development and build artifacts
 node_modules/
+dist/
+build/
+.eslintcache
+.vitest.cache
+coverage/
+.ntvs_analysis.dat
+.env*.local
 
 # Visual Studio 6 build log
 *.plg
@@ -416,3 +423,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Temp publish folders (local builds)
+**/temp-publish/
+**/.temp-publish/
