@@ -4,6 +4,8 @@ A full-stack semantic search application built for a short story publisher.
 Users can search for short stories using natural language — the system 
 finds stories based on meaning and theme, not just exact words.
 
+It uses AI-generated embeddings and vector similarity search to match user intent.
+
 Built as a team learning project by a team of 6 developers 
 (4 backend, 1 fullstack, 1 frontend) to explore semantic search, 
 vector embeddings, and AI-powered text processing.
@@ -48,11 +50,10 @@ This will automatically:
 The first run will take a few minutes while Docker downloads
 the AI models. You will see download progress in the terminal.
 
-### 4. Load stories into the database
-Once all services are running, open a new terminal and run:
-```bash
-curl -X POST http://localhost:5162/api/ingestion/run
-```
+### 4. Automatic ingestion
+
+On startup, the backend automatically checks whether stories are already processed.  
+If not, it runs ingestion in the background — no manual step is required.
 
 ### 5. Open the application
 - **Frontend:** http://localhost:80
@@ -62,6 +63,9 @@ curl -X POST http://localhost:5162/api/ingestion/run
 ```bash
 docker compose down
 ```
+## Data Ingestion
+
+On startup, the system loads story data, generates summaries and embeddings using Ollama, and stores them in PostgreSQL with pgvector. This allows the application to perform semantic search efficiently.
 
 ## API Endpoints
 
@@ -77,10 +81,10 @@ docker compose down
 | GET | `/api/stories` | Returns all stories in the database |
 | GET | `/api/stories/{id}` | Returns a single story by ID |
 
-### Ingestion
+### Ingestion (optional)
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/ingestion/run` | Loads and processes all stories into the database |
+| POST | `/api/ingestion/run` | Manually triggers ingestion (not required, runs automatically on startup) |
 
 ### Request Example
 ```json
@@ -101,7 +105,7 @@ POST /api/search
         "year": 1952,
         "genre": "Fiction",
         "summary": "An old fisherman struggles alone at sea.",
-        "similarity": 0.86
+        "similarity": 86
     }
 ]
 ```
@@ -123,10 +127,10 @@ PostgreSQL            Ollama
 ### How Search Works
 1. User enters a search query in the frontend
 2. Frontend sends the query to the backend API
-3. Backend generates an embedding vector using Ollama
-4. Backend runs semantic search against PostgreSQL using pgvector
+3. Backend generates an embedding using Ollama
+4. Backend runs semantic search against PostgreSQL using pgvector, which compares embeddings using cosine distance
 5. Backend runs keyword search against story metadata
-6. Results are combined using weighted ranking (70% semantic, 30% keyword)
+6. Results are ranked primarily by semantic similarity, with a small keyword-based bonus to improve exact matches
 7. Top results are returned to the frontend
 
 ### Documentation
@@ -139,12 +143,12 @@ PostgreSQL            Ollama
 
 | Name | Role |
 |---|---|
-| [name] | Backend Developer |
-| [name] | Backend Developer |
-| [name] | Backend Developer |
-| [name] | Backend Developer |
-| [name] | Fullstack Developer |
-| [name] | Frontend Developer |
+| Brage | Backend Developer |
+| Andreas | Backend Developer |
+| Salwa | Backend Developer |
+| Dainius | Backend Developer |
+| Kalid | Fullstack Developer |
+| Sarah | Frontend Developer |
 
 ## Links
 - [Search Architecture Documentation](docs/search-architecture.md)

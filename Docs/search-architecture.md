@@ -96,7 +96,7 @@ For example:
   (0.80 × 0.70) + (0 × 0.30) = **0.56 final score**
 
 ### Where it lives in the code
-- Main logic: `SearchService.HybridSearchAsync()`
+- Main logic: `SearchService.SemanticSearchWithKeywordBoostAsync()`
 - Semantic weight: 0.7 (defined as a constant)
 - Keyword weight: 0.3 (defined as a constant)
 - Final score is returned to the frontend as `Similarity`
