@@ -9,6 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+    
       - pgdata:/var/lib/postgresql/data
 
   ollama:
@@ -18,17 +19,48 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+  
+  ollama-init:
+    image: curlimages/curl:latest
+    container_name: semantic_ollama_init
+    depends_on:
+      - ollama
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sleep 5
+        curl -s http://ollama:11434/api/pull -d '{"model":"nomic-embed-text:latest","stream":false}'
+        curl -s http://ollama:11434/api/pull -d '{"model":"gemma3:1b","stream":false}'
+    restart: "no"
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: semantic_pgadmin
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: semantic_backend
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: secret
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=semanticdb;Username=admin;Password=secret
+      - Ollama__Url=http://ollama:11434
     ports:
-      - "5050:80"
+      - "5162:8080"
     depends_on:
       - postgres
+      - ollama
+    volumes:
+      - ./Docs:/Docs # Map Docs folder for StoryDataLoader
+
+  frontend:
+    build:
+      context: ./Web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5162
+    container_name: semantic_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:

@@ -1,0 +1,193 @@
+//this class implemets IOllamaSrvice, It is responsible for communicating with Ollama to generate embedding and summaries.
+
+using OllamaSharp.Models;
+using OllamaSharp;
+using Backend.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+
+
+namespace Backend.Services;
+                            //this class must implement IOllamaService contract
+public class OllamaService : IOllamaService
+{
+    //this is a viarable that hods our connection to the Ollama API. We will use it to send requests to Ollama and get responses back
+            //readonly = can only be assigned once, in the constructor. This is good for things like API clients that should not change after they are created.
+                    //a class provided by the OllamaSharp library that makes it easy to send requests to the Ollama API and handle responses.
+                                    //the name of the connection
+    private readonly OllamaApiClient _ollama;
+
+    private readonly string _summaryModel;
+    private readonly string _embeddingModel;
+    private readonly ILogger<OllamaService> _logger;
+
+    public OllamaService(IConfiguration configuration, ILogger<OllamaService> logger)
+    {
+        var ollamaUrl = configuration["Ollama:Url"] ?? "http://localhost:11434";
+        _ollama = new OllamaApiClient(ollamaUrl);
+        _summaryModel = configuration["Ollama:SummaryModel"] ?? "gemma3:1b";
+        _embeddingModel = configuration["Ollama:EmbeddingModel"] ?? "nomic-embed-text";
+        _ollama.SelectedModel = _summaryModel;
+        _logger = logger;
+    }
+
+    public async Task<bool> WaitForModelsAsync(CancellationToken ct)
+    {
+        _logger.LogInformation("Waiting for Ollama models ({EmbedModel} and {SummaryModel}) to be ready...", "nomic-embed-text", _summaryModel);
+
+        const int maxRetries = 20; // 20 * 10s = ~3.3 minutes
+        for (int i = 0; i < maxRetries; i++)
+        {
+            if (ct.IsCancellationRequested) return false;
+
+            try
+            {
+                var models = await _ollama.ListLocalModelsAsync(ct);
+                var modelNames = models.Select(m => m.Name).ToList();
+
+                bool embedReady = modelNames.Any(n => n.Contains("nomic-embed-text"));
+                bool summaryReady = modelNames.Any(n => n.Contains(_summaryModel));
+
+                if (embedReady && summaryReady)
+                {
+                    _logger.LogInformation("All required Ollama models are ready!");
+                    return true;
+                }
+
+                _logger.LogInformation("Still waiting for models... (Found: {Models})", string.Join(", ", modelNames));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Ollama connection not yet available: {Message}", ex.Message);
+            }
+
+            await Task.Delay(10000, ct); // Wait 10 seconds between checks
+        }
+
+        _logger.LogError("Timed out waiting for Ollama models.");
+        return false;
+    }
+
+    // this is my helper method hat retries an operation if it fails, in here <T> measn that this method can return any type of data.
+    private async Task<T> RetryAsync<T>(Func<Task<T>> action, int maxRetries = 3)
+
+
+    {   
+        //delays will control how long we wait between retries, we start with 1 second and then double it for each retry (1s, 2s, 4s) to give the system more time to recover if there is a temporary issue. We will retry a maximum of 3 times before giving up and letting the exception happen.
+        var delayMs = 1000;
+
+
+        //we try the operation ultiple times 
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+
+        {   
+            //try to execute the operation (for example calling Ollama) if it succeeds, return the result immeddiately
+            try
+            {
+                return await action();
+            }
+
+            //if error happens catch it, retry happens only if "when" we still have attempts left
+            catch when (attempt < maxRetries)
+            {
+                //this bit waits before trying again, everytime waiting time doubles
+                await Task.Delay(delayMs);
+
+                delayMs *= 2; // backoff timer: double the delay for the next retry
+            }
+        }
+
+        // This code is unreachable. On the final attempt, the exception from `action()` will
+        // not be caught by the `catch` block and will propagate up, which is the correct behavior.
+        // We add a throw to satisfy the compiler's need for a return path.
+        throw new InvalidOperationException("This code should not be reachable.");
+    }
+
+
+    //method bellow sends text to Ollama and gets back a vector that represents the meaning of the text. We use this to convert stories and search queries into vectors so we can find stories that match the meaning of a search.
+            //async- this method runs asynchronously(app wont freeze)
+                //returns a list of decimal numbers that represent the embedding vector
+                    //the name of the method
+                        //accepts plain text as input
+                        //task = specifies if the embedding is for a search query or a document
+    public async Task<float[]> GenerateEmbeddingAsync(string text, EmbeddingTask task = EmbeddingTask.Document)
+    {
+        // For nomic-embed-text, we should use specific prefixes for query and document.
+        // https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+        var processedText = text.ToLower(); // ← Normalize to lowercase
+        
+        if (_embeddingModel.Contains("nomic-embed-text"))
+        {
+            var prefix = task == EmbeddingTask.Query ? "search_query: " : "search_document: ";
+            processedText = prefix + processedText;
+        }
+
+        //sends the text to Ollama and asks for an embedding
+                    //"await" means to wait for ollama to respond before continuing
+                                                            //here we tell ollama what we want
+        var result = await RetryAsync(() => _ollama.EmbedAsync(new EmbedRequest
+            {
+                //name of the AI model we are using to generate the menedding of the text. This is a model provided by Ollama that is specifically designed for converting text into embedding vectors.
+                Model = _embeddingModel,
+
+                //the text we want to convertto vector
+                Input = new List<string> { processedText }
+            }) );
+
+        //Ollama returns doubles (decimal numbers), we convert them to float because what our interface expects. We use LINQ to select each number in the result and convert it to a float, then we convert the whole thing to an array.
+        return result.Embeddings[0].Select(d => (float)d).ToArray();
+    }
+
+    //this method sends text to alllama and gets back the a generated summary 
+    public async Task<string> GenerateSummaryAsync(string text)
+    {
+        return await RetryAsync(async () =>
+        {        
+            //we create a prompt for ollama asking it to summarize the story in 1-2 sentences and we include formatting instructions so the model returns only the text without introductions ot extra commentary.
+            var prompt = $"""
+            Summarize the following short story in 1-2 sentences.
+
+            Return only the summary text.
+            Do not add an introduction.
+            Do not say "Here is a summary".
+            Do not use bullet points.
+
+            Story:
+            {text}
+            """;
+
+            //empty string to hold the response from Ollama as it comes in chunks
+            var response = "";
+
+            //Add each chunkto our response as it comes in. We use "await foreach" because the response from Ollama is a stream of data that comes in chunks, and we want to process each chunk as it arrives without waiting for the entire response to be finished.
+            await foreach (var chunk in _ollama.GenerateAsync(prompt))
+            {
+                                //we add each chunk of the response to our response variable. The "?"" means that if the chunk is null, we will just add an empty string instead of throwing an error.
+                response += chunk?.Response ?? "";
+            }
+
+            //once we have received the entire response from Ollama, we trim any extra whitespace from the beginning and end of the response and return it as the summary.
+            var cleaned = response.Trim();
+            //remove extra LLM sentences
+            var parts = cleaned.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length > 1)
+            {
+                cleaned = parts.Last();
+            }
+            return cleaned.Trim();
+        });
+
+
+    }
+}
+
+
+/*  for learning purposes, here is an architecturalof this service:
+                                                                    Controller
+                                                                        ↓
+                                                                    OllamaService
+                                                                        ↓
+                                                                    RetryAsync
+                                                                        ↓
+                                                                    Ollama API 
+It provides two capabilities: text to embedding vector, text to summary*/

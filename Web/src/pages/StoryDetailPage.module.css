@@ -1,0 +1,257 @@
+.page {
+  min-height: calc(100vh - 60px);
+  background: var(--vanilla-cream);
+  animation: fadeIn 0.3s ease;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 32px 100px;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 100px 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--weathered-sand);
+  border-top-color: var(--honey-gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  padding: 6px 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.back:hover {
+  color: var(--honey-gold);
+  border-color: var(--honey-gold);
+}
+
+.header {
+  margin-bottom: 0;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.genreBadge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 99px;
+}
+
+.yearBadge {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--oatmilk);
+  border: 1px solid var(--weathered-sand);
+  padding: 3px 12px;
+  border-radius: 99px;
+}
+
+.idBadge {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-faint);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 900;
+  color: var(--midnight-espresso);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.author {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.scoreBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: #fff;
+  border: 1px solid var(--weathered-sand);
+  border-left: 3px solid var(--honey-gold);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 12px;
+}
+
+.scoreLeft {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.scoreTitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+
+.scoreValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--honey-gold);
+  line-height: 1;
+}
+
+.scoreBarWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scoreTrack {
+  height: 6px;
+  background: var(--oatmilk);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--apricot-glow), var(--honey-gold));
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scoreHint {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 300;
+}
+
+
+
+.summaryLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--honey-gold);
+  margin-bottom: 6px;
+}
+
+.summaryText {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.divider {
+  text-align: center;
+  color: var(--honey-gold);
+  font-size: 24px;
+  margin: 40px 0;
+  opacity: 0.4;
+}
+
+.content {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.9;
+  color: var(--text-body);
+}
+
+.content p {
+  margin-bottom: 1.2em;
+}
+
+.noContent {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 100px 24px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.notFoundIcon {
+  font-size: 48px;
+  color: var(--weathered-sand);
+}
+
+.notFound h2 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--walnut-bark);
+}
+
+.notFound p {
+  font-size: 14px;
+  font-weight: 300;
+  max-width: 320px;
+}
+
+.backBtn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vanilla-cream);
+  background: var(--midnight-espresso);
+  padding: 11px 22px;
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.backBtn:hover {
+  background: var(--honey-gold);
+}
+
+@media (max-width: 600px) {
+  .container { padding: 28px 18px 80px; }
+}
+
